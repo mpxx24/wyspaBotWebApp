@@ -18,7 +18,9 @@ namespace wyspaBotWebApp.Core {
                 "   -rtracks <track id> <limit (default: 10)> -> get tracks recommended based on given track id",
                 "   -wct -> today's world cup games",
                 "   -wcy -> yesterday's world cup games",
-                "   -wiki <text> <lang (PL/EN)>-> wikipedia's definition (BETA :P)",
+                //"   -wiki <text> <lang (PL/EN)>-> wikipedia's definition (BETA :P)",
+                //"   -pbin <numberOfLines>" -> save last <numberOfLines> messages to pastebin,
+                "   -ghrepo link to github repository",
                 "",
                 "Throwing tables is not allowed!"
             };
@@ -71,6 +73,12 @@ namespace wyspaBotWebApp.Core {
     public class StopUsingPrivateChannelCommand : ICommand {
         public IEnumerable<string> GetText() {
             return new List<string> {"Stop using private messages!"};
+        }
+    }
+
+    public class GetRepositoryAddressCommand : ICommand {
+        public IEnumerable<string> GetText() {
+            return new List<string> { "https://github.com/mpxx24/wyspaBotWebApp" };
         }
     }
 

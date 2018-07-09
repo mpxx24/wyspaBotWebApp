@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using wyspaBotWebApp.Models;
+using wyspaBotWebApp.Services.WorldCup;
 
 namespace wyspaBotWebApp.Services {
     public interface IWorldCupService {

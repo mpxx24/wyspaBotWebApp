@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace wyspaBotWebApp.Models {
+namespace wyspaBotWebApp.Services.WorldCup {
     public class WorldCupApiData {
         [JsonProperty("venue")]
         public string Venue { get; set; }

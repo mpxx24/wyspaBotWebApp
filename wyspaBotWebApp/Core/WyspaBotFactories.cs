@@ -18,6 +18,8 @@ namespace wyspaBotWebApp.Core {
                     return new ResponseWhenMentionedCommand();
                 case CommandType.StopUsingPrivateChannelCommand:
                     return new StopUsingPrivateChannelCommand();
+                case CommandType.GetRepositoryAddressCommand:
+                    return new GetRepositoryAddressCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }

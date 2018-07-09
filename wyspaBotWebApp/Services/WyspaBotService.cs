@@ -178,6 +178,9 @@ namespace wyspaBotWebApp.Services {
                                     this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify opponent's name!)");
                                 }
                                 break;
+                            case "-ghrepo":
+                                this.WyspaBotSay(CommandType.GetRepositoryAddressCommand);
+                                break;
                             default:
                                 if (splitInput.Any(x => x.Contains(this.botName))) {
                                     this.WyspaBotSay(CommandType.ResponseWhenMentionedCommand);

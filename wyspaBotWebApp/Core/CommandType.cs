@@ -14,6 +14,7 @@
         StopUsingPrivateChannelCommand = 11,
         GetWikipediaDefinitionCommand = 12,
         PokeBattleCommand = 13,
+        GetRepositoryAddressCommand = 14,
 
         LogErrorCommand = 999,
     }

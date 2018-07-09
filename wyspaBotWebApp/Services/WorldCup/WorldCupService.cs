@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
-using wyspaBotWebApp.Models;
+using wyspaBotWebApp.Services.WorldCup;
 
 namespace wyspaBotWebApp.Services {
     public class WorldCupService : IWorldCupService {

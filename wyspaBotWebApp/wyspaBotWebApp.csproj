@@ -179,7 +179,7 @@
     <Compile Include="Core\WyspaBotFactories.cs" />
     <Compile Include="Services\IWyspaBotService.cs" />
     <Compile Include="Services\WorldCup\IWorldCupService.cs" />
-    <Compile Include="Models\WorldCupApiClasses.cs" />
+    <Compile Include="Services\WorldCup\WorldCupApiClasses.cs" />
     <Compile Include="Services\WorldCup\WorldCupService.cs" />
     <Compile Include="Services\WyspaBotService.cs" />
   </ItemGroup>
@@ -226,6 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
