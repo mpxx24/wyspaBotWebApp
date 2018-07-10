@@ -53,8 +53,9 @@
       <HintPath>..\packages\Autofac.Mvc5.4.0.2\lib\net45\Autofac.Integration.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="SpotifyApiWrapper">
-      <HintPath>..\..\WyspaWTBot\WyspaWTBot\bin\Debug\netcoreapp2.0\SpotifyApiWrapper.dll</HintPath>
+    <Reference Include="SpotifyApiWrapper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\SpotifyApiWrapper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -210,7 +211,9 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -242,7 +245,7 @@
     <Content Include="Scripts\jquery-3.3.1.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\BotEngine\WikipediaApi\WikipediaApiWrapper.csproj">
+    <ProjectReference Include="..\WikipediaApiWrapper\WikipediaApi\WikipediaApiWrapper.csproj">
       <Project>{08670f92-902a-47a8-aad5-5f1b5247afce}</Project>
       <Name>WikipediaApiWrapper</Name>
     </ProjectReference>
