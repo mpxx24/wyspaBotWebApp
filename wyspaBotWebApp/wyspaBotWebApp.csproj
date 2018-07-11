@@ -53,6 +53,9 @@
       <HintPath>..\packages\Autofac.Mvc5.4.0.2\lib\net45\Autofac.Integration.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="MPX.Utilities, Version=0.0.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MPX.Utilities.0.0.0.2\lib\netstandard2.0\MPX.Utilities.dll</HintPath>
+    </Reference>
     <Reference Include="SpotifyApiWrapper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\SpotifyApiWrapper.dll</HintPath>
