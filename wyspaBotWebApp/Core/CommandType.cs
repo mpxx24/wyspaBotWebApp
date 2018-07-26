@@ -15,6 +15,8 @@
         GetWikipediaDefinitionCommand = 12,
         PokeBattleCommand = 13,
         GetRepositoryAddressCommand = 14,
+        PokeBattleStatsCommand = 15,
+        ClearPokeBattleStatsCommand = 16,
 
         LogErrorCommand = 999,
     }

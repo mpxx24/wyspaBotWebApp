@@ -82,6 +82,18 @@ namespace wyspaBotWebApp.Core {
         }
     }
 
+    public class PokeBattleStatsCommand : ICommand {
+        public IEnumerable<string> GetText() {
+            return IoC.Resolve<IPokemonService>().GetPokeBattleStats();
+        }
+    }
+    public class ClearPokeBattleStatsCommand : ICommand {
+        public IEnumerable<string> GetText() {
+            IoC.Resolve<IPokemonService>().ClearStats();
+            return new List<string>{"Stats has been cleared."};
+        }
+    }
+
     public class IntroduceYourselfCommand : ICommandWithStringParameter {
         public IEnumerable<string> GetText(string parameter) {
             return new List<string> {

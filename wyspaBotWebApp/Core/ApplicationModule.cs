@@ -2,6 +2,7 @@
 using Autofac;
 using Autofac.Core;
 using Autofac.Integration.Mvc;
+using NHibernate;
 using wyspaBotWebApp.Services;
 using wyspaBotWebApp.Services.Pokemon;
 
@@ -18,6 +19,9 @@ namespace wyspaBotWebApp.Core {
         }
 
         protected override void Load(ContainerBuilder builder) {
+            builder.Register(x => NhibernateHelper.OpenSession()).As<ISession>();
+            builder.RegisterGeneric(typeof(Repository<>)).As(typeof(IRepository<>));
+
             builder.RegisterType<RequestsService>().As<IRequestsService>();
             builder.RegisterType<WorldCupService>().As<IWorldCupService>();
             builder.RegisterType<WyspaBotService>().As<IWyspaBotService>()
@@ -27,6 +31,7 @@ namespace wyspaBotWebApp.Core {
                    }).SingleInstance();
             builder.RegisterType<PokemonApiService>().As<IPokemonApiService>();
             builder.RegisterType<PokemonService>().As<IPokemonService>();
+
             //builder.RegisterType<PasteBinApiService>().As<IPasteBinApiService>()
             //       .WithParameter(new NamedParameter("pastebinApiDevKey", this.pastebinApiDevKey));
 

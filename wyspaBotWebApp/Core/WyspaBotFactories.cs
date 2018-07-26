@@ -20,6 +20,10 @@ namespace wyspaBotWebApp.Core {
                     return new StopUsingPrivateChannelCommand();
                 case CommandType.GetRepositoryAddressCommand:
                     return new GetRepositoryAddressCommand();
+                case CommandType.PokeBattleStatsCommand:
+                    return new PokeBattleStatsCommand();
+                case CommandType.ClearPokeBattleStatsCommand:
+                    return new ClearPokeBattleStatsCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }

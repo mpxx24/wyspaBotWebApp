@@ -22,6 +22,7 @@ namespace wyspaBotWebApp.Services {
         private TcpClient irc;
         private StreamReader reader;
         public string Server = "irc.freenode.net";
+        private readonly List<string> lastInnerException = new List<string>();
 
         public WyspaBotService(string channel, string botName) {
             this.channel = channel;
@@ -43,11 +44,21 @@ namespace wyspaBotWebApp.Services {
             }
             catch (Exception e) {
                 this.WyspaBotSay(CommandType.LogErrorCommand, "Something went wrong (>ლ)");
+                this.lastInnerException.Clear();
+                var excSplit = e.ToString().Split(new[] {"\r\n"}, StringSplitOptions.None);
+                foreach (var m in excSplit) {
+                    if (m.Contains("End of inner exception stack trace")) {
+                        break;
+                    }
+                    this.lastInnerException.Add(m);
+                }
+
                 this.ReadChat();
             }
         }
 
         public void StopBot() {
+            this.chatUsers.Clear();
             this.irc.Close();
         }
 
@@ -94,7 +105,7 @@ namespace wyspaBotWebApp.Services {
                     }
 
                     if (splitInput.Count >= 4) {
-                        this.postedMessages.Add(splitInput[3]);
+                        //this.postedMessages.Add(splitInput[3]);
                     }
 
                     if (splitInput.Count >= 4 && splitInput[3].Trim() == this.throwingTableString || splitInput.Count >= 5 && (splitInput[3] + splitInput[4]).Trim() == this.throwingTableString) {
@@ -181,6 +192,15 @@ namespace wyspaBotWebApp.Services {
                             case "-ghrepo":
                                 this.WyspaBotSay(CommandType.GetRepositoryAddressCommand);
                                 break;
+                            case "-pbStats":
+                                this.WyspaBotSay(CommandType.PokeBattleStatsCommand);
+                                break;
+                            case "-clpbs":
+                                this.WyspaBotSay(CommandType.ClearPokeBattleStatsCommand);
+                                break;
+                            case "-debug":
+                                this.WyspaBotDebug(this.lastInnerException);
+                                break;
                             default:
                                 if (splitInput.Any(x => x.Contains(this.botName))) {
                                     this.WyspaBotSay(CommandType.ResponseWhenMentionedCommand);
@@ -252,6 +272,12 @@ namespace wyspaBotWebApp.Services {
 
             foreach (var message in list) {
                 this.SendData($"{this.messageAlias} {nick} :{message}");
+            }
+        }
+        private void WyspaBotDebug(IEnumerable<string> list) {
+            foreach (var message in list) {
+                this.SendData($"{this.messageAlias} {this.channel} :{message}");
+                Thread.Sleep(750);
             }
         }
     }
