@@ -31,6 +31,8 @@ namespace wyspaBotWebApp.Core {
                    }).SingleInstance();
             builder.RegisterType<PokemonApiService>().As<IPokemonApiService>();
             builder.RegisterType<PokemonService>().As<IPokemonService>();
+            //builder.RegisterType<BotConfigurationService>().Named<IBotConfigurationService>("botConfigService");
+            //builder.RegisterDecorator<IBotConfigurationService>((c, inner) => new BotConfigurationServiceDecorator(inner), "botConfigService");
 
             //builder.RegisterType<PasteBinApiService>().As<IPasteBinApiService>()
             //       .WithParameter(new NamedParameter("pastebinApiDevKey", this.pastebinApiDevKey));

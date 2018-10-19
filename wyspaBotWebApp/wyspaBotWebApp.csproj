@@ -191,8 +191,14 @@
     <Compile Include="Core\IRepository.cs" />
     <Compile Include="Core\NhibernateHelper.cs" />
     <Compile Include="Core\Repository.cs" />
+    <Compile Include="Dtos\Configuration\BotCommandPrivilegeDto.cs" />
+    <Compile Include="Models\BotCommandPrivilege.cs" />
+    <Compile Include="Models\BotCommandPrivilegeMap.cs" />
     <Compile Include="Models\PokeBattleResultMap.cs" />
     <Compile Include="Models\PokeBattleResult.cs" />
+    <Compile Include="Services\Configuration\BotConfigurationService.cs" />
+    <Compile Include="Services\Configuration\BotConfigurationServiceDecorator.cs" />
+    <Compile Include="Services\Configuration\IBotConfigurationService.cs" />
     <Compile Include="Services\PasteBin\IPasteBinApiService.cs" />
     <Compile Include="Services\Pokemon\Dtos\PokeBattleStandingsDto.cs" />
     <Compile Include="Services\Pokemon\Dtos\PokeBattleStringNumberObject.cs" />

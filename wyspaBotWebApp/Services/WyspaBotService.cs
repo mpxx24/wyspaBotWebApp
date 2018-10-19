@@ -100,6 +100,8 @@ namespace wyspaBotWebApp.Services {
                     }
 
                     if (splitInput.Count >= 3 && splitInput[1] == this.messageAlias && splitInput[2] == this.botName) {
+
+
                         var nick = this.GetUserNick(splitInput);
                         this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
                     }

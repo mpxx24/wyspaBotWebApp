@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using wyspaBotWebApp.Core;
 using wyspaBotWebApp.Models;
 using wyspaBotWebApp.Services.Pokemon.Dtos;
@@ -17,7 +18,11 @@ namespace wyspaBotWebApp.Services.Pokemon {
         }
 
         public IEnumerable<string> PerformBattle(string challengerName, string opponentName) {
-            var battle = new List<string> {$"{challengerName} and {opponentName} - it's time to d-d-d-d-d-duel!"};
+            if (challengerName == opponentName) {
+                return new List<string>{"You can't fight yourself..."};
+            }
+
+            var fullBattle = new List<string> {$"{challengerName} and {opponentName} - it's time to d-d-d-d-d-duel!"};
             var pokeBattleRecord = new PokeBattleResult();
 
             var pokemonOfFirstPLayer = this.GetRandomPokemonForPlayer();
@@ -29,22 +34,23 @@ namespace wyspaBotWebApp.Services.Pokemon {
                 }
             }
 
-            battle.Add($"{challengerName}'s pokemon is {pokemonOfFirstPLayer.name}! - {opponentName}'s pokemon is {pokemonOfSecondPlayer.name}!");
-            battle.Add("FIGHT!");
+            fullBattle.Add($"{challengerName}'s pokemon is {pokemonOfFirstPLayer.name}! - {opponentName}'s pokemon is {pokemonOfSecondPlayer.name}!");
+            fullBattle.Add("FIGHT!");
 
             var rand = new Random();
 
             var firstPokemonsHealth = pokemonOfFirstPLayer.stats?.FirstOrDefault(x => x.stat.name == "hp")?.base_stat;
             var secondPokemonsHealth = pokemonOfSecondPlayer.stats?.FirstOrDefault(x => x.stat.name == "hp")?.base_stat;
 
-            battle.Add($"{pokemonOfFirstPLayer.name}'s HP: {firstPokemonsHealth} - {pokemonOfSecondPlayer.name}'s HP: {secondPokemonsHealth}");
+            fullBattle.Add($"{pokemonOfFirstPLayer.name}'s HP: {firstPokemonsHealth} - {pokemonOfSecondPlayer.name}'s HP: {secondPokemonsHealth}");
 
+            var battle = new StringBuilder();
             while (firstPokemonsHealth > 0 && secondPokemonsHealth > 0) {
                 var randAbilityNameForFirstPokemon = GetRandomAbilityNameForPokemon(pokemonOfFirstPLayer);
                 var randAbilityNameForSecondPokemon = GetRandomAbilityNameForPokemon(pokemonOfSecondPlayer);
 
-                battle.Add($"{pokemonOfFirstPLayer.name} uses {randAbilityNameForFirstPokemon}!");
-                battle.Add($"{pokemonOfSecondPlayer.name} uses {randAbilityNameForSecondPokemon}!");
+                //fullBattle.Add($"{pokemonOfFirstPLayer.name} uses {randAbilityNameForFirstPokemon}!");
+                //fullBattle.Add($"{pokemonOfSecondPlayer.name} uses {randAbilityNameForSecondPokemon}!");
 
                 var firstPokemonAbilityDmg = rand.Next(secondPokemonsHealth.Value + 1);
                 var secondPokemonAbilityDmg = rand.Next(firstPokemonsHealth.Value + 1);
@@ -52,25 +58,27 @@ namespace wyspaBotWebApp.Services.Pokemon {
                 if (rand.Next(100) % 30 == 0) {
                     firstPokemonAbilityDmg *= 2;
                     secondPokemonsHealth -= firstPokemonAbilityDmg;
-                    battle.Add($"CRIT! - {randAbilityNameForFirstPokemon} dealt {firstPokemonAbilityDmg} DMG!");
+                    //fullBattle.Add($"CRIT! - {randAbilityNameForFirstPokemon} dealt {firstPokemonAbilityDmg} DMG!");
                 }
                 else {
                     secondPokemonsHealth -= firstPokemonAbilityDmg;
-                    battle.Add($"{randAbilityNameForFirstPokemon} dealt {firstPokemonAbilityDmg} DMG!");
+                    //fullBattle.Add($"{randAbilityNameForFirstPokemon} dealt {firstPokemonAbilityDmg} DMG!");
                 }
 
                 if (rand.Next(100) % 30 == 0) {
                     secondPokemonAbilityDmg *= 2;
                     firstPokemonsHealth -= secondPokemonAbilityDmg;
-                    battle.Add($"CRIT! - {randAbilityNameForSecondPokemon} dealt {secondPokemonAbilityDmg} DMG!");
+                    //fullBattle.Add($"CRIT! - {randAbilityNameForSecondPokemon} dealt {secondPokemonAbilityDmg} DMG!");
                 }
                 else {
                     firstPokemonsHealth -= secondPokemonAbilityDmg;
-                    battle.Add($"{randAbilityNameForSecondPokemon} dealt {secondPokemonAbilityDmg} DMG!");
+                    //fullBattle.Add($"{randAbilityNameForSecondPokemon} dealt {secondPokemonAbilityDmg} DMG!");
                 }
 
-                battle.Add($"{pokemonOfFirstPLayer.name}'s HP: {firstPokemonsHealth} - {pokemonOfSecondPlayer.name}'s HP: {secondPokemonsHealth}");
+                battle.Append($"({firstPokemonsHealth} - {secondPokemonsHealth}),");
             }
+            battle.Length -= 1;
+            fullBattle.Add(battle.ToString());
 
             if (firstPokemonsHealth <= 0 && secondPokemonsHealth <= 0) {
                 pokeBattleRecord.PlayerNick = challengerName;
@@ -79,7 +87,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
                 pokeBattleRecord.WinningPokemonName = string.Empty;
                 pokeBattleRecord.LoosingPokemonName = string.Empty;
 
-                battle.Add("TIE!");
+                fullBattle.Add("TIE!");
             }
             else {
                 var winner = firstPokemonsHealth > secondPokemonsHealth ? challengerName : opponentName;
@@ -91,13 +99,13 @@ namespace wyspaBotWebApp.Services.Pokemon {
                 pokeBattleRecord.WinningPokemonName = winningPokemon.name;
                 pokeBattleRecord.LoosingPokemonName = winningPokemon == pokemonOfFirstPLayer ? pokemonOfSecondPlayer.name : pokemonOfFirstPLayer.name;
 
-                battle.Add($"{winner} and his {winningPokemon.name} WON!");
+                fullBattle.Add($"{winner} and his {winningPokemon.name} WON!");
             }
 
             try {
                 this.pokeBattleRepository.Save(pokeBattleRecord);
 
-                return battle;
+                return fullBattle;
             }
             catch (Exception e) {
                 //TODO: log/handle

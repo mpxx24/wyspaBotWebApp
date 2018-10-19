@@ -31,7 +31,7 @@ namespace wyspaBotWebApp.Core {
             return Fluently.Configure()
                            .Database(SQLiteConfiguration.Standard.UsingFile(dbFilePath))
                            .Mappings(m => { m.FluentMappings.AddFromNamespaceOf<PokeBattleResult>(); })
-                           .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(false, true))
+                           .ExposeConfiguration(cfg => new SchemaUpdate(cfg).Execute(false, true))
                            .BuildSessionFactory();
         }
     }
