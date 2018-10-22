@@ -58,6 +58,8 @@ namespace wyspaBotWebApp.Core {
                     return new GetWikipediaDefinitionCommand();
                 case CommandType.PokeBattleCommand:
                     return new PokeBattleCommand();
+                case CommandType.GoogleMapDistanceCommand:
+                    return new GoogleMapDistanceCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }

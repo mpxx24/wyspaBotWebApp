@@ -119,15 +119,17 @@ namespace wyspaBotWebApp.Services {
                             splitInput.Add(string.Empty);
                         }
 
-                        switch (splitInput[4].Trim()) {
+                        switch (splitInput[4].Trim().ToLowerInvariant()) {
                             case "":
                                 this.WyspaBotSay(CommandType.IntroduceYourselfCommand, this.botName);
                                 break;
                             case "-help":
+                            case "help":
                             case "-h":
                                 this.WyspaBotSay(CommandType.HelpCommand);
                                 break;
                             case "-rtracks":
+                            case "rtracks":
                                 if (splitInput.Count >= 6) {
                                     var trackId = splitInput[5];
                                     var limit = 10;
@@ -141,9 +143,11 @@ namespace wyspaBotWebApp.Services {
                                 }
                                 break;
                             case "-wct":
+                            case "wct":
                                 this.WyspaBotSay(CommandType.TodaysWorldCupGamesCommand);
                                 break;
                             case "-wcy":
+                            case "wcy":
                                 this.WyspaBotSay(CommandType.YesterdaysWorldCupGamesAndScoresCommand);
                                 break;
                             //case "-pbin":
@@ -174,7 +178,8 @@ namespace wyspaBotWebApp.Services {
                             case "-cltmp":
                                 this.postedMessages.Clear();
                                 break;
-                            case "-pokeBattle":
+                            case "-pokebattle":
+                            case "pokebattle":
                                 if (splitInput.Count >= 6) {
                                     var opponentName = splitInput[5];
 
@@ -192,13 +197,28 @@ namespace wyspaBotWebApp.Services {
                                 }
                                 break;
                             case "-ghrepo":
+                            case "ghrepo":
                                 this.WyspaBotSay(CommandType.GetRepositoryAddressCommand);
                                 break;
-                            case "-pbStats":
+                            case "-pbstats":
+                            case "pbstats":
                                 this.WyspaBotSay(CommandType.PokeBattleStatsCommand);
                                 break;
                             case "-clpbs":
+                            case "clpbs":
                                 this.WyspaBotSay(CommandType.ClearPokeBattleStatsCommand);
+                                break;
+                            case "-gmdistance":
+                            case "gmdistance":
+                                if (splitInput.Count >= 7) {
+                                    var origin = splitInput[5];
+                                    var destination = splitInput[6];
+
+                                    this.WyspaBotSay(CommandType.GoogleMapDistanceCommand, new List<string>{origin, destination});
+                                }
+                                else {
+                                    this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: origin and destination!)");
+                                }
                                 break;
                             case "-debug":
                                 this.WyspaBotDebug(this.lastInnerException);
@@ -276,6 +296,7 @@ namespace wyspaBotWebApp.Services {
                 this.SendData($"{this.messageAlias} {nick} :{message}");
             }
         }
+
         private void WyspaBotDebug(IEnumerable<string> list) {
             foreach (var message in list) {
                 this.SendData($"{this.messageAlias} {this.channel} :{message}");

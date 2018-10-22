@@ -17,6 +17,7 @@
         GetRepositoryAddressCommand = 14,
         PokeBattleStatsCommand = 15,
         ClearPokeBattleStatsCommand = 16,
+        GoogleMapDistanceCommand = 17,
 
         LogErrorCommand = 999,
     }

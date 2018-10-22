@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using SpotifyApiWrapper.API.Wrappers;
 using wyspaBotWebApp.Services;
+using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Pokemon;
 using WikipediaApi;
 using WikipediaApi.Helpers;
@@ -191,6 +192,16 @@ namespace wyspaBotWebApp.Core {
             }
 
             return new List<string> {article};
+        }
+    }
+
+    public class GoogleMapDistanceCommand : ICommandWithStringIenumerableParameter {
+        public IEnumerable<string> GetText(IEnumerable<string> parameters) {
+            var p = parameters as IList<string> ?? parameters.ToList();
+            if (p.Count != 2) {
+                
+            }
+            return IoC.Resolve<IGoogleMapsService>().GetDistance(p[0], p[1]);
         }
     }
 

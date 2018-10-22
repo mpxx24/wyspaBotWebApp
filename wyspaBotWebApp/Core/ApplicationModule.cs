@@ -4,6 +4,7 @@ using Autofac.Core;
 using Autofac.Integration.Mvc;
 using NHibernate;
 using wyspaBotWebApp.Services;
+using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Pokemon;
 
 namespace wyspaBotWebApp.Core {
@@ -31,6 +32,7 @@ namespace wyspaBotWebApp.Core {
                    }).SingleInstance();
             builder.RegisterType<PokemonApiService>().As<IPokemonApiService>();
             builder.RegisterType<PokemonService>().As<IPokemonService>();
+            builder.RegisterType<GoogleMapsService>().As<IGoogleMapsService>();
             //builder.RegisterType<BotConfigurationService>().Named<IBotConfigurationService>("botConfigService");
             //builder.RegisterDecorator<IBotConfigurationService>((c, inner) => new BotConfigurationServiceDecorator(inner), "botConfigService");
 

@@ -61,6 +61,9 @@
     <Reference Include="FluentNHibernate, Version=2.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\FluentNHibernate.2.0.3.0\lib\net40\FluentNHibernate.dll</HintPath>
     </Reference>
+    <Reference Include="Google.Maps, Version=0.25.0.0, Culture=neutral, PublicKeyToken=4aa992bb5d22d4ff, processorArchitecture=MSIL">
+      <HintPath>..\packages\gmaps-api-net.0.25.0\lib\net461\Google.Maps.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="MPX.Utilities, Version=0.0.0.2, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MPX.Utilities.0.0.0.2\lib\netstandard2.0\MPX.Utilities.dll</HintPath>
@@ -199,6 +202,8 @@
     <Compile Include="Services\Configuration\BotConfigurationService.cs" />
     <Compile Include="Services\Configuration\BotConfigurationServiceDecorator.cs" />
     <Compile Include="Services\Configuration\IBotConfigurationService.cs" />
+    <Compile Include="Services\GoogleMaps\GoogleMapsService.cs" />
+    <Compile Include="Services\GoogleMaps\IGoogleMapsService.cs" />
     <Compile Include="Services\PasteBin\IPasteBinApiService.cs" />
     <Compile Include="Services\Pokemon\Dtos\PokeBattleStandingsDto.cs" />
     <Compile Include="Services\Pokemon\Dtos\PokeBattleStringNumberObject.cs" />
@@ -271,6 +276,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Services\Helpers\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
