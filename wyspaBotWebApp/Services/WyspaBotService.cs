@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
+using MarkovSharp.TokenisationStrategies;
 using wyspaBotWebApp.Core;
 
 namespace wyspaBotWebApp.Services {
@@ -23,6 +24,8 @@ namespace wyspaBotWebApp.Services {
         private StreamReader reader;
         public string Server = "irc.freenode.net";
         private readonly List<string> lastInnerException = new List<string>();
+        private readonly StringMarkov markovChainModel = new StringMarkov(1);
+        private bool shouldStartSavingMessages;
 
         public WyspaBotService(string channel, string botName) {
             this.channel = channel;
@@ -78,6 +81,17 @@ namespace wyspaBotWebApp.Services {
                         this.SendData(joinString);
                     }
 
+                    if (splitInput[1] == "NICK") {
+                        var previousNick = this.GetUserNick(splitInput);
+                        if (this.chatUsers.Any(x => x == previousNick)) {
+                            var indexOf = this.chatUsers.IndexOf(previousNick);
+                            this.chatUsers[indexOf] = splitInput[2].Substring(1, splitInput[2].Length - 1);
+                        } else if (this.chatUsers.Any(x => x == $"@{previousNick}")) {
+                            var indexOf = this.chatUsers.IndexOf($"@{previousNick}");
+                            this.chatUsers[indexOf] = splitInput[2].Substring(1, splitInput[2].Length - 1);
+                        }
+                    }
+
                     if (splitInput.Count >= 6 && splitInput[2] == this.botName && (splitInput[3] == "@" || splitInput[3] == "=") && splitInput[4] == this.channel) {
                         var numberOfPeopleInChat = splitInput.Count - 6;
                         
@@ -86,6 +100,7 @@ namespace wyspaBotWebApp.Services {
                         }
 
                         this.WyspaBotSay(CommandType.SayHelloAfterJoining, this.chatUsers);
+                        this.shouldStartSavingMessages = true;
                     }
 
                     if (splitInput[1] == "JOIN") {
@@ -100,21 +115,22 @@ namespace wyspaBotWebApp.Services {
                     }
 
                     if (splitInput.Count >= 3 && splitInput[1] == this.messageAlias && splitInput[2] == this.botName) {
-
-
                         var nick = this.GetUserNick(splitInput);
                         this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
                     }
 
-                    if (splitInput.Count >= 4) {
-                        //this.postedMessages.Add(splitInput[3]);
+                    if (splitInput.Count >= 4 && this.shouldStartSavingMessages && splitInput[3] != $":{this.botName}" && splitInput[3] != $":{this.botName}:") {
+                        var separator = $"{this.channel} :";
+                        var phrase = inputLine.Substring(inputLine.IndexOf(separator, StringComparison.Ordinal) + separator.Length);
+                        //this.postedMessages.Add(phrase);
+                        this.markovChainModel.Learn(phrase);
                     }
 
                     if (splitInput.Count >= 4 && splitInput[3].Trim() == this.throwingTableString || splitInput.Count >= 5 && (splitInput[3] + splitInput[4]).Trim() == this.throwingTableString) {
                         this.WyspaBotSay(CommandType.PutTheTableBackCommand);
                     }
 
-                    if (splitInput.Count >= 4 && splitInput[3] == $":{this.botName}") {
+                    if (splitInput.Count >= 4 && (splitInput[3] == $":{this.botName}" || splitInput[3] == $":{this.botName}:")) {
                         if (splitInput.Count == 4) {
                             splitInput.Add(string.Empty);
                         }
@@ -219,6 +235,17 @@ namespace wyspaBotWebApp.Services {
                                 else {
                                     this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: origin and destination!)");
                                 }
+                                break;
+                            //case "-learn":
+                            //case "learn":
+                            //    this.markovChainModel.Learn(this.postedMessages);
+                            //    this.postedMessages.Clear();
+                            //    this.WyspaBotDebug(new List<string>{"OK"});
+                            //    break;
+                            case "-markov":
+                            case "markov":
+                                var message = this.markovChainModel.Walk().First();
+                                this.WyspaBotDebug(new List<string>{message});
                                 break;
                             case "-debug":
                                 this.WyspaBotDebug(this.lastInnerException);
