@@ -12,7 +12,7 @@
         SayHelloToNewcomerCommand = 9,
         SayHelloAfterJoining = 10,
         StopUsingPrivateChannelCommand = 11,
-        GetWikipediaDefinitionCommand = 12,
+        //GetWikipediaDefinitionCommand = 12,
         PokeBattleCommand = 13,
         GetRepositoryAddressCommand = 14,
         PokeBattleStatsCommand = 15,

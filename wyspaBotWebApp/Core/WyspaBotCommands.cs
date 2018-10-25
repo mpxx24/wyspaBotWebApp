@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using SpotifyApiWrapper.API.Wrappers;
 using wyspaBotWebApp.Services;
 using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Pokemon;
-using WikipediaApi;
-using WikipediaApi.Helpers;
 
 //TODO: move some of the logic to services
 namespace wyspaBotWebApp.Core {
@@ -153,45 +150,6 @@ namespace wyspaBotWebApp.Core {
             var listOfNicks = nicks as IList<string> ?? nicks.ToList();
 
             return listOfNicks.Select(nick => $"Hello {nick} :)").ToList();
-        }
-    }
-
-    //TODO: refactor
-    public class GetWikipediaDefinitionCommand : ICommandWithStringIenumerableParameter {
-        public IEnumerable<string> GetText(IEnumerable<string> items) {
-            var listOfItems = items as IList<string> ?? items.ToList();
-
-            WikiLanguage language;
-            switch (listOfItems.Last()) {
-                case "PL":
-                    language = WikiLanguage.Polish;
-                    break;
-                case "EN":
-                    language = WikiLanguage.English;
-                    break;
-                default:
-                    language = WikiLanguage.Polish;
-                    listOfItems.Add("PL");
-                    break;
-            }
-
-            var sb = new StringBuilder();
-
-            for (var i = 0; i < listOfItems.Count - 1; i++) {
-                sb.Append($"{listOfItems[i]} ");
-            }
-
-            sb.Length--;
-
-            string article;
-            try {
-                article = WikiApi.GetWikipediaArticle(sb.ToString(), language);
-            }
-            catch (Exception e) {
-                article = "failed to retrieve data";
-            }
-
-            return new List<string> {article};
         }
     }
 

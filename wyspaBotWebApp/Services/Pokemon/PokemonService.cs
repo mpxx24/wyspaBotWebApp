@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NLog;
 using wyspaBotWebApp.Core;
 using wyspaBotWebApp.Models;
 using wyspaBotWebApp.Services.Pokemon.Dtos;
@@ -11,6 +12,8 @@ namespace wyspaBotWebApp.Services.Pokemon {
         private readonly IRepository<PokeBattleResult> pokeBattleRepository;
 
         private readonly IPokemonApiService pokemonApiService;
+
+        private ILogger logger = LogManager.GetCurrentClassLogger();
 
         public PokemonService(IPokemonApiService pokemonApiService, IRepository<PokeBattleResult> pokeBattleRepository) {
             this.pokemonApiService = pokemonApiService;
@@ -108,7 +111,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
                 return fullBattle;
             }
             catch (Exception e) {
-                //TODO: log/handle
+                this.logger.Debug(e, "Exception occured while perfoming poke battle");
                 throw;
             }
         }
@@ -130,6 +133,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
         }
 
         public void ClearStats() {
+            this.logger.Debug("Clearing poke battle stats");
             this.pokeBattleRepository.DeleteAll();
         }
 

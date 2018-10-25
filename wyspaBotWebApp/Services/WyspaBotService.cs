@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using MarkovSharp.TokenisationStrategies;
+using NLog;
 using wyspaBotWebApp.Core;
 
 namespace wyspaBotWebApp.Services {
@@ -27,6 +28,8 @@ namespace wyspaBotWebApp.Services {
         private readonly StringMarkov markovChainModel = new StringMarkov(1);
         private bool shouldStartSavingMessages;
 
+        private ILogger logger = LogManager.GetCurrentClassLogger();
+
         public WyspaBotService(string channel, string botName) {
             this.channel = channel;
             this.botName = botName;
@@ -35,6 +38,7 @@ namespace wyspaBotWebApp.Services {
 
         public void StartBot() {
             try {
+                this.logger.Debug($"Starting {this.botName} - connecting to: {this.Server}:{this.port}");
                 this.irc = new TcpClient(this.Server, this.port);
                 var stream = this.irc.GetStream();
                 this.reader = new StreamReader(stream);
@@ -46,6 +50,7 @@ namespace wyspaBotWebApp.Services {
                 this.ReadChat();
             }
             catch (Exception e) {
+                this.logger.Debug(e, "Exception occured!");
                 this.WyspaBotSay(CommandType.LogErrorCommand, "Something went wrong (>ლ)");
                 this.lastInnerException.Clear();
                 var excSplit = e.ToString().Split(new[] {"\r\n"}, StringSplitOptions.None);
@@ -55,21 +60,25 @@ namespace wyspaBotWebApp.Services {
                     }
                     this.lastInnerException.Add(m);
                 }
-
+                this.logger.Debug("Trying to start reading chat again");
                 this.ReadChat();
             }
         }
 
         public void StopBot() {
+            this.logger.Debug($"Stopping {this.botName}!");
             this.chatUsers.Clear();
             this.irc.Close();
         }
 
         private void ReadChat() {
+            this.logger.Debug($"Starting to read the chat! Channel {this.channel}");
             while (true) {
                 string inputLine;
+                var separator = $"{this.channel} :";
                 while ((inputLine = this.reader.ReadLine()) != null) {
                     var splitInput = inputLine.Split(' ').ToList();
+                    var phrase = inputLine.Substring(inputLine.IndexOf(separator, StringComparison.Ordinal) + separator.Length);
 
                     if (splitInput[0] == "PING") {
                         var pongReply = splitInput[1];
@@ -100,7 +109,6 @@ namespace wyspaBotWebApp.Services {
                         }
 
                         this.WyspaBotSay(CommandType.SayHelloAfterJoining, this.chatUsers);
-                        this.shouldStartSavingMessages = true;
                     }
 
                     if (splitInput[1] == "JOIN") {
@@ -117,11 +125,10 @@ namespace wyspaBotWebApp.Services {
                     if (splitInput.Count >= 3 && splitInput[1] == this.messageAlias && splitInput[2] == this.botName) {
                         var nick = this.GetUserNick(splitInput);
                         this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
+                        this.shouldStartSavingMessages = true;
                     }
 
                     if (splitInput.Count >= 4 && this.shouldStartSavingMessages && splitInput[3] != $":{this.botName}" && splitInput[3] != $":{this.botName}:") {
-                        var separator = $"{this.channel} :";
-                        var phrase = inputLine.Substring(inputLine.IndexOf(separator, StringComparison.Ordinal) + separator.Length);
                         //this.postedMessages.Add(phrase);
                         this.markovChainModel.Learn(phrase);
                     }
@@ -179,17 +186,6 @@ namespace wyspaBotWebApp.Services {
                             //            this.WyspaBotSay(CommandType.LogErrorCommand, $"Provided parameter <${nameof(limit)}> is not a number");
                             //        }
                             //    }
-                            //    break;
-                            //case "-wiki":
-                            //    var wordsToCheckInWiki = splitInput.Count - 6;
-                            //    var words = new List<string>();
-
-                            //    var numberOfWords = splitInput.Count >= wordsToCheckInWiki + 1 ? wordsToCheckInWiki + 1 : wordsToCheckInWiki;
-                            //    for (var i = 0; i < numberOfWords; i++) {
-                            //        words.Add(splitInput[5 + i]);
-                            //    }
-
-                            //    this.WyspaBotSay(CommandType.GetWikipediaDefinitionCommand, words);
                             //    break;
                             case "-cltmp":
                                 this.postedMessages.Clear();

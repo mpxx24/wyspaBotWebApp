@@ -1,10 +1,13 @@
 ﻿using System;
 using Newtonsoft.Json;
+using NLog;
 
 namespace wyspaBotWebApp.Services.Pokemon {
     public class PokemonApiService : IPokemonApiService {
         private readonly string apiAddress = "http://pokeapi.co/api/v2/pokemon/{0}";
         private readonly IRequestsService requestsService;
+
+        private ILogger logger = LogManager.GetCurrentClassLogger();
 
         public PokemonApiService(IRequestsService requestsService) {
             this.requestsService = requestsService;
@@ -20,7 +23,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
                 return JsonConvert.DeserializeObject<PokemonApiRootObject>(pokemonJson);
             }
             catch (Exception e) {
-                //TODO: handle & log
+                this.logger.Debug(e, $"Failed to fetch random pokemon! Pokemon ID {pokemonId}. The response was: {pokemonJson}");
                 throw e;
             }
         }
