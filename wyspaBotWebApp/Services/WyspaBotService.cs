@@ -232,12 +232,6 @@ namespace wyspaBotWebApp.Services {
                                     this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: origin and destination!)");
                                 }
                                 break;
-                            //case "-learn":
-                            //case "learn":
-                            //    this.markovChainModel.Learn(this.postedMessages);
-                            //    this.postedMessages.Clear();
-                            //    this.WyspaBotDebug(new List<string>{"OK"});
-                            //    break;
                             case "-markov":
                             case "markov":
                                 var message = this.markovChainModel.Walk().First();
