@@ -18,6 +18,9 @@
         PokeBattleStatsCommand = 15,
         ClearPokeBattleStatsCommand = 16,
         GoogleMapDistanceCommand = 17,
+        AddEvent = 18,
+        GetNextEvent = 19,
+        ListAllEvents = 20,
 
         LogErrorCommand = 999,
     }

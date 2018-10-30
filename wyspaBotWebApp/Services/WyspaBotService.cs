@@ -25,7 +25,7 @@ namespace wyspaBotWebApp.Services {
         private StreamReader reader;
         public string Server = "irc.freenode.net";
         private readonly List<string> lastInnerException = new List<string>();
-        private readonly StringMarkov markovChainModel = new StringMarkov(1);
+        private readonly StringMarkov markovChainModel = new StringMarkov(3);
         private bool shouldStartSavingMessages;
 
         private ILogger logger = LogManager.GetCurrentClassLogger();
@@ -53,13 +53,16 @@ namespace wyspaBotWebApp.Services {
                 this.logger.Debug(e, "Exception occured!");
                 this.WyspaBotSay(CommandType.LogErrorCommand, "Something went wrong (>ლ)");
                 this.lastInnerException.Clear();
-                var excSplit = e.ToString().Split(new[] {"\r\n"}, StringSplitOptions.None);
-                foreach (var m in excSplit) {
-                    if (m.Contains("End of inner exception stack trace")) {
-                        break;
+                var excSplit = e.InnerException?.ToString().Split(new[] {"\r\n"}, StringSplitOptions.None);
+                if (excSplit != null) {
+                    foreach (var m in excSplit) {
+                        if (m.Contains("End of inner exception stack trace")) {
+                            break;
+                        }
+                        this.lastInnerException.Add(m);
                     }
-                    this.lastInnerException.Add(m);
                 }
+
                 this.logger.Debug("Trying to start reading chat again");
                 this.ReadChat();
             }
@@ -114,7 +117,10 @@ namespace wyspaBotWebApp.Services {
                     if (splitInput[1] == "JOIN") {
                         var nick = this.GetUserNick(splitInput);
                         if (nick != this.botName) {
-                            this.chatUsers.Add(nick);
+                            var indexOf = this.chatUsers.IndexOf(nick);
+                            if (indexOf != -1) {
+                                this.chatUsers.Add(nick);
+                            }
                             var random = new Random();
 
                             var parameters = new List<string> {nick, this.channel, this.textFaces[random.Next(this.textFaces.Count)]};
@@ -128,7 +134,7 @@ namespace wyspaBotWebApp.Services {
                         this.shouldStartSavingMessages = true;
                     }
 
-                    if (splitInput.Count >= 4 && this.shouldStartSavingMessages && splitInput[3] != $":{this.botName}" && splitInput[3] != $":{this.botName}:") {
+                    if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.Contains(this.botName)) {
                         //this.postedMessages.Add(phrase);
                         this.markovChainModel.Learn(phrase);
                     }
@@ -237,6 +243,32 @@ namespace wyspaBotWebApp.Services {
                                 var message = this.markovChainModel.Walk().First();
                                 this.WyspaBotDebug(new List<string>{message});
                                 break;
+                            case "-addevent":
+                            case "addevent":
+                                if (splitInput.Count >= 7) {
+                                    var whoAdded = this.GetUserNick(splitInput);
+                                    var realPrhase = this.GetPhraseWithoutCommandAndBotName(phrase, "addevent");
+
+                                    var realArguments = realPrhase.Split('-').Select(x => x.Trim()).ToList();
+                                    if (realArguments.Count != 3) {
+                                        this.WyspaBotSay(CommandType.LogErrorCommand, "You need to pass exactly 3 parameters seperated by '-' sign!");
+                                        break;
+                                    }
+
+                                    this.WyspaBotSay(CommandType.AddEvent, new List<string> {whoAdded, realArguments[0], realArguments[1], realArguments[2]});
+                                }
+                                else {
+                                    this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: event name and time!)");
+                                }
+                                break;
+                            case "-listevents":
+                            case "listevents":
+                                this.WyspaBotSay(CommandType.ListAllEvents);
+                                break;
+                            //case "-nextevent":
+                            //case "nextevent":
+                            //    this.WyspaBotSay(CommandType.GetNextEvent);
+                            //    break;
                             case "-debug":
                                 this.WyspaBotDebug(this.lastInnerException);
                                 break;
@@ -261,7 +293,6 @@ namespace wyspaBotWebApp.Services {
                 writer.WriteLine(cmd);
                 writer.Flush();
             }
-
             else {
                 writer.WriteLine(cmd + " " + param);
                 writer.Flush();
@@ -319,6 +350,26 @@ namespace wyspaBotWebApp.Services {
                 this.SendData($"{this.messageAlias} {this.channel} :{message}");
                 Thread.Sleep(750);
             }
+        }
+
+        private string GetPhraseWithoutCommandAndBotName(string phrase, string command) {
+            var commandWithDash = $"-{command}";
+            var fullBotName = $"{this.botName}:";
+
+            var indexOfBotName = phrase.IndexOf(fullBotName, StringComparison.InvariantCulture);
+            phrase = phrase.Remove(indexOfBotName, fullBotName.Length);
+
+            var indexOfCommandWithDash = phrase.IndexOf(commandWithDash, StringComparison.InvariantCulture);
+            var indexOfCommand = phrase.IndexOf(command, StringComparison.InvariantCulture);
+
+            var doesPhraseContainCommandWithDash = indexOfCommandWithDash != -1;
+            var doesPhraseContainCommand = indexOfCommand != -1;
+
+            return doesPhraseContainCommandWithDash
+                ? phrase.Remove(indexOfCommandWithDash, commandWithDash.Length)
+                : doesPhraseContainCommand
+                    ? phrase.Remove(indexOfCommand, command.Length)
+                    : phrase;
         }
     }
 }

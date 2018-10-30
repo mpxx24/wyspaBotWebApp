@@ -58,11 +58,14 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="FluentNHibernate, Version=2.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentNHibernate.2.0.3.0\lib\net40\FluentNHibernate.dll</HintPath>
+    <Reference Include="FluentNHibernate, Version=2.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentNHibernate.2.1.2\lib\net461\FluentNHibernate.dll</HintPath>
     </Reference>
     <Reference Include="Google.Maps, Version=0.25.0.0, Culture=neutral, PublicKeyToken=4aa992bb5d22d4ff, processorArchitecture=MSIL">
       <HintPath>..\packages\gmaps-api-net.0.25.0\lib\net461\Google.Maps.dll</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Iesi.Collections.4.0.4\lib\net461\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="MarkovSharp, Version=4.0.6652.30076, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MarkovSharp.4.0.32\lib\net461\MarkovSharp.dll</HintPath>
@@ -205,11 +208,16 @@
     <Compile Include="Core\IRepository.cs" />
     <Compile Include="Core\NhibernateHelper.cs" />
     <Compile Include="Core\Repository.cs" />
+    <Compile Include="Dtos\CalendarEventDto.cs" />
     <Compile Include="Dtos\Configuration\BotCommandPrivilegeDto.cs" />
     <Compile Include="Models\BotCommandPrivilege.cs" />
     <Compile Include="Models\BotCommandPrivilegeMap.cs" />
+    <Compile Include="Models\CalendarEvent.cs" />
+    <Compile Include="Models\CalendarEventMap.cs" />
     <Compile Include="Models\PokeBattleResultMap.cs" />
     <Compile Include="Models\PokeBattleResult.cs" />
+    <Compile Include="Services\Calendar\CalendarService.cs" />
+    <Compile Include="Services\Calendar\ICalendarService.cs" />
     <Compile Include="Services\Configuration\BotConfigurationService.cs" />
     <Compile Include="Services\Configuration\BotConfigurationServiceDecorator.cs" />
     <Compile Include="Services\Configuration\IBotConfigurationService.cs" />

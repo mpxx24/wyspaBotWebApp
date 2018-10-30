@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using SpotifyApiWrapper.API.Wrappers;
+using wyspaBotWebApp.Dtos;
 using wyspaBotWebApp.Services;
+using wyspaBotWebApp.Services.Calendar;
 using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Pokemon;
 
@@ -85,10 +87,25 @@ namespace wyspaBotWebApp.Core {
             return IoC.Resolve<IPokemonService>().GetPokeBattleStats();
         }
     }
+
     public class ClearPokeBattleStatsCommand : ICommand {
         public IEnumerable<string> GetText() {
             IoC.Resolve<IPokemonService>().ClearStats();
             return new List<string>{"Stats has been cleared."};
+        }
+    }
+
+    public class GetNextEventCommand : ICommand {
+        public IEnumerable<string> GetText() {
+            var nextEntry = IoC.Resolve<ICalendarService>().GetNextEntry();
+            return new List<string>{$"{nextEntry.Name} - {nextEntry.Place} - {nextEntry.When.ToShortDateString()}"};
+        }
+    }
+
+    public class ListAllEventsCommand : ICommand {
+        public IEnumerable<string> GetText() {
+            var allEntries = IoC.Resolve<ICalendarService>().GetAllEntries();
+            return allEntries.Select(x => $"{x.Name} - {x.Place} - {x.When.ToShortDateString()}");
         }
     }
 
@@ -153,16 +170,45 @@ namespace wyspaBotWebApp.Core {
         }
     }
 
+    //TODO: refactor
     public class GoogleMapDistanceCommand : ICommandWithStringIenumerableParameter {
         public IEnumerable<string> GetText(IEnumerable<string> parameters) {
             var p = parameters as IList<string> ?? parameters.ToList();
-            if (p.Count != 2) {
-                
-            }
+           
             return IoC.Resolve<IGoogleMapsService>().GetDistance(p[0], p[1]);
         }
     }
 
+    //TODO: refactor
+    public class AddNewEventCommand : ICommandWithStringIenumerableParameter {
+        public IEnumerable<string> GetText(IEnumerable<string> parameters) {
+            var p = parameters as IList<string> ?? parameters.ToList();
+
+            if (p.Count != 4) {
+                return new List<string>{"Invalid number of parameters!"};
+            }
+
+            var when = new DateTime();
+            if (!DateTime.TryParse(p[3], out when)) {
+                if (int.TryParse(p[3], out var numberOfDaysFromNow)) {
+                    when = DateTime.Now.AddDays(numberOfDaysFromNow);
+                }
+            }
+
+            var calendatDto = new CalendarEventDto {
+                Id = Guid.NewGuid(),
+                AddedBy = p[0],
+                Added = DateTime.Now,
+                Name = p[1],
+                Place = p[2],
+                When = when 
+            };
+            IoC.Resolve<ICalendarService>().AddEntry(calendatDto);
+            return new List<string>{"New event added!"};
+        }
+    }
+
+    //TODO: refactor
     public class RecommendedTracksBasedOnTrackCommand : ICommandWithTwoParameters {
         public IEnumerable<string> GetText(string parameter, int value) {
             if (string.IsNullOrEmpty(parameter)) {

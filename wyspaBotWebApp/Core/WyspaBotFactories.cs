@@ -24,6 +24,10 @@ namespace wyspaBotWebApp.Core {
                     return new PokeBattleStatsCommand();
                 case CommandType.ClearPokeBattleStatsCommand:
                     return new ClearPokeBattleStatsCommand();
+                case CommandType.GetNextEvent:
+                    return new GetNextEventCommand();
+                case CommandType.ListAllEvents:
+                    return new ListAllEventsCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }
@@ -58,6 +62,8 @@ namespace wyspaBotWebApp.Core {
                     return new PokeBattleCommand();
                 case CommandType.GoogleMapDistanceCommand:
                     return new GoogleMapDistanceCommand();
+                case CommandType.AddEvent:
+                    return new AddNewEventCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }

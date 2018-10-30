@@ -55,9 +55,10 @@ namespace wyspaBotWebApp.Services.Calendar {
 
         public CalendarEventDto GetNextEntry() {
             try {
-                var closestInTimeEntry = this.repository.Filter<CalendarEvent>(x => Math.Abs(DateTime.Now.Ticks - x.When.Ticks) > 0)
+                var closestInTimeEntry = this.repository.Filter<CalendarEvent>(x => Math.Abs(DateTime.Now.Ticks - x.When.Date.Ticks) > 0)
                                              .OrderBy(x => x.When)
                                              .FirstOrDefault();
+
                 //TODO: null
                 if (closestInTimeEntry == null) {
                     return null;
