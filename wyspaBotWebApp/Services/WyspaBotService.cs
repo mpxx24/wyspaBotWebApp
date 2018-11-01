@@ -265,10 +265,10 @@ namespace wyspaBotWebApp.Services {
                             case "listevents":
                                 this.WyspaBotSay(CommandType.ListAllEvents);
                                 break;
-                            //case "-nextevent":
-                            //case "nextevent":
-                            //    this.WyspaBotSay(CommandType.GetNextEvent);
-                            //    break;
+                            case "-nextevent":
+                            case "nextevent":
+                                this.WyspaBotSay(CommandType.GetNextEvent);
+                                break;
                             case "-debug":
                                 this.WyspaBotDebug(this.lastInnerException);
                                 break;

@@ -35,7 +35,7 @@ namespace wyspaBotWebApp.Services.Calendar {
 
         public IEnumerable<CalendarEventDto> GetAllEntries() {
             try {
-                var allEntries = this.repository.GetAll().ToList();
+                var allEntries = this.repository.GetAll().Where(x => x.When > DateTime.Now).ToList();
                 this.logger.Debug($"Found {allEntries.Count} calendar entries.");
 
                 return allEntries.Select(x => new CalendarEventDto {
@@ -55,7 +55,7 @@ namespace wyspaBotWebApp.Services.Calendar {
 
         public CalendarEventDto GetNextEntry() {
             try {
-                var closestInTimeEntry = this.repository.Filter<CalendarEvent>(x => Math.Abs(DateTime.Now.Ticks - x.When.Date.Ticks) > 0)
+                var closestInTimeEntry = this.repository.GetAll().Where(x => x.When > DateTime.Now && Math.Abs(DateTime.Now.Ticks - x.When.Date.Ticks) > 0)
                                              .OrderBy(x => x.When)
                                              .FirstOrDefault();
 
@@ -74,7 +74,7 @@ namespace wyspaBotWebApp.Services.Calendar {
                 };
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Failed to closest entry!");
+                this.logger.Debug(e, "Failed to get the next entry!");
                 throw;
             }
         }
