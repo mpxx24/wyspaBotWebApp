@@ -10,8 +10,8 @@ using wyspaBotWebApp.Core;
 
 namespace wyspaBotWebApp.Services {
     public class WyspaBotService : IWyspaBotService {
-        public readonly string botName;
-        public readonly string channel;
+        private readonly string botName;
+        private readonly string channel;
 
         private static StreamWriter writer;
         private readonly string messageAlias = "PRIVMSG";
@@ -23,12 +23,12 @@ namespace wyspaBotWebApp.Services {
         private readonly string user;
         private TcpClient irc;
         private StreamReader reader;
-        public string Server = "irc.freenode.net";
+        private string Server = "irc.freenode.net";
         private readonly List<string> lastInnerException = new List<string>();
         private readonly StringMarkov markovChainModel = new StringMarkov(3);
         private bool shouldStartSavingMessages;
 
-        private ILogger logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         public WyspaBotService(string channel, string botName) {
             this.channel = channel;
