@@ -13,7 +13,8 @@ namespace wyspaBotWebApp.Services {
         private readonly string botName;
         private readonly string channel;
 
-        private static StreamWriter writer;
+        private StreamWriter writer;
+        private StreamReader reader;
         private readonly string messageAlias = "PRIVMSG";
         private readonly int port = 6667;
         private readonly List<string> postedMessages = new List<string>();
@@ -22,10 +23,9 @@ namespace wyspaBotWebApp.Services {
         private readonly string throwingTableString = ":(╯°□°）╯︵┻━┻";
         private readonly string user;
         private TcpClient irc;
-        private StreamReader reader;
-        private string Server = "irc.freenode.net";
+        private readonly string server = "irc.freenode.net";
         private readonly List<string> lastInnerException = new List<string>();
-        private readonly StringMarkov markovChainModel = new StringMarkov(3);
+        private readonly StringMarkov markovChainModel = new StringMarkov(2);
         private bool shouldStartSavingMessages;
 
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
@@ -38,15 +38,15 @@ namespace wyspaBotWebApp.Services {
 
         public void StartBot() {
             try {
-                this.logger.Debug($"Starting {this.botName} - connecting to: {this.Server}:{this.port}");
-                this.irc = new TcpClient(this.Server, this.port);
+                this.logger.Debug($"Starting {this.botName} - connecting to: {this.server}:{this.port}");
+                this.irc = new TcpClient(this.server, this.port);
                 var stream = this.irc.GetStream();
                 this.reader = new StreamReader(stream);
-                writer = new StreamWriter(stream);
-                writer.WriteLine("NICK " + this.botName);
-                writer.Flush();
-                writer.WriteLine(this.user);
-                writer.Flush();
+                this.writer = new StreamWriter(stream);
+                this.writer.WriteLine("NICK " + this.botName);
+                this.writer.Flush();
+                this.writer.WriteLine(this.user);
+                this.writer.Flush();
                 this.ReadChat();
             }
             catch (Exception e) {
@@ -62,9 +62,6 @@ namespace wyspaBotWebApp.Services {
                         this.lastInnerException.Add(m);
                     }
                 }
-
-                this.logger.Debug("Trying to start reading chat again");
-                this.ReadChat();
             }
         }
 
@@ -105,6 +102,7 @@ namespace wyspaBotWebApp.Services {
                     }
 
                     if (splitInput.Count >= 6 && splitInput[2] == this.botName && (splitInput[3] == "@" || splitInput[3] == "=") && splitInput[4] == this.channel) {
+                        this.chatUsers.Clear();
                         var numberOfPeopleInChat = splitInput.Count - 6;
                         
                         for (var i = 0; i < numberOfPeopleInChat; i++) {
@@ -255,7 +253,7 @@ namespace wyspaBotWebApp.Services {
                                         break;
                                     }
 
-                                    this.WyspaBotSay(CommandType.AddEvent, new List<string> {whoAdded, realArguments[0], realArguments[1], realArguments[2]});
+                                    this.WyspaBotSay(CommandType.AddEventCommand, new List<string> {whoAdded, realArguments[0], realArguments[1], realArguments[2]});
                                 }
                                 else {
                                     this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: event name and time!)");
@@ -263,11 +261,15 @@ namespace wyspaBotWebApp.Services {
                                 break;
                             case "-listevents":
                             case "listevents":
-                                this.WyspaBotSay(CommandType.ListAllEvents);
+                                this.WyspaBotSay(CommandType.ListAllEventsCommand);
                                 break;
                             case "-nextevent":
                             case "nextevent":
-                                this.WyspaBotSay(CommandType.GetNextEvent);
+                                this.WyspaBotSay(CommandType.GetNextEventCommand);
+                                break;
+                            case "-npod":
+                            case "npod":
+                                this.WyspaBotSay(CommandType.NasaPictureOfTheDayCommand);
                                 break;
                             case "-debug":
                                 this.WyspaBotDebug(this.lastInnerException);
@@ -290,12 +292,12 @@ namespace wyspaBotWebApp.Services {
 
         public void SendData(string cmd, string param = "") {
             if (param == null) {
-                writer.WriteLine(cmd);
-                writer.Flush();
+                this.writer.WriteLine(cmd);
+                this.writer.Flush();
             }
             else {
-                writer.WriteLine(cmd + " " + param);
-                writer.Flush();
+                this.writer.WriteLine(cmd + " " + param);
+                this.writer.Flush();
             }
         }
 

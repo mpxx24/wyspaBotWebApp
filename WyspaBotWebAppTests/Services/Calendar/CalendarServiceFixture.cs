@@ -61,7 +61,7 @@ namespace WyspaBotWebAppTests.Services.Calendar {
             };
 
             this.fakeRepository = MockRepository.GenerateMock<IRepository<CalendarEvent>>();
-            this.fakeRepository.Stub(x => x.GetAll()).Return(new List<CalendarEvent> {calendarEvent1, calendarEvent2, calendarEvent3, calendarEvent4}.AsQueryable());
+            this.fakeRepository.Stub(x => x.GetAll()).Return(new List<CalendarEvent> {this.calendarEvent1, this.calendarEvent2, this.calendarEvent3, this.calendarEvent4}.AsQueryable());
             this.testee = new CalendarService(this.fakeRepository);
         }
 

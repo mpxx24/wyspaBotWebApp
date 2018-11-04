@@ -18,9 +18,10 @@
         PokeBattleStatsCommand = 15,
         ClearPokeBattleStatsCommand = 16,
         GoogleMapDistanceCommand = 17,
-        AddEvent = 18,
-        GetNextEvent = 19,
-        ListAllEvents = 20,
+        AddEventCommand = 18,
+        GetNextEventCommand = 19,
+        ListAllEventsCommand = 20,
+        NasaPictureOfTheDayCommand = 21,
 
         LogErrorCommand = 999,
     }

@@ -226,6 +226,9 @@
     <Compile Include="Services\Configuration\IBotConfigurationService.cs" />
     <Compile Include="Services\GoogleMaps\GoogleMapsService.cs" />
     <Compile Include="Services\GoogleMaps\IGoogleMapsService.cs" />
+    <Compile Include="Services\NasaApi\NasaApiPictureOfTheDayRootObject.cs" />
+    <Compile Include="Services\NasaApi\INasaApiService.cs" />
+    <Compile Include="Services\NasaApi\NasaApiService.cs" />
     <Compile Include="Services\PasteBin\IPasteBinApiService.cs" />
     <Compile Include="Services\Pokemon\Dtos\PokeBattleStandingsDto.cs" />
     <Compile Include="Services\Pokemon\Dtos\PokeBattleStringNumberObject.cs" />

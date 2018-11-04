@@ -6,6 +6,7 @@ using wyspaBotWebApp.Dtos;
 using wyspaBotWebApp.Services;
 using wyspaBotWebApp.Services.Calendar;
 using wyspaBotWebApp.Services.GoogleMaps;
+using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
 
 //TODO: move some of the logic to services
@@ -106,6 +107,16 @@ namespace wyspaBotWebApp.Core {
         public IEnumerable<string> GetText() {
             var allEntries = IoC.Resolve<ICalendarService>().GetAllEntries();
             return allEntries.Select(x => $"{x.Name} - {x.Place} - {x.When.ToShortDateString()}");
+        }
+    }
+
+    public class NasaPictureOfTheDayCommand : ICommand {
+        public IEnumerable<string> GetText() {
+            var pictoreOfTheDayRootObject = IoC.Resolve<INasaApiService>().GetPictureOfTheDay();
+            return new List<string> {
+                pictoreOfTheDayRootObject.Title,
+                pictoreOfTheDayRootObject.Hdurl.ToString()
+            };
         }
     }
 

@@ -6,18 +6,21 @@ using NHibernate;
 using wyspaBotWebApp.Services;
 using wyspaBotWebApp.Services.Calendar;
 using wyspaBotWebApp.Services.GoogleMaps;
+using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
 
 namespace wyspaBotWebApp.Core {
     public class ApplicationModule : Module {
         private readonly string botName;
         private readonly string channelName;
+        private readonly string nasaApiKey;
         private readonly string pastebinApiDevKey;
 
-        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName) {
+        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey) {
             this.pastebinApiDevKey = pastebinApiDevKey;
             this.channelName = channelName;
             this.botName = botName;
+            this.nasaApiKey = nasaApiKey;
         }
 
         protected override void Load(ContainerBuilder builder) {
@@ -35,6 +38,9 @@ namespace wyspaBotWebApp.Core {
             builder.RegisterType<PokemonService>().As<IPokemonService>();
             builder.RegisterType<GoogleMapsService>().As<IGoogleMapsService>();
             builder.RegisterType<CalendarService>().As<ICalendarService>();
+            builder.RegisterType<NasaApiService>().As<INasaApiService>()
+                   .WithParameter(new NamedParameter("apiKey", this.nasaApiKey));
+
             //builder.RegisterType<BotConfigurationService>().Named<IBotConfigurationService>("botConfigService");
             //builder.RegisterDecorator<IBotConfigurationService>((c, inner) => new BotConfigurationServiceDecorator(inner), "botConfigService");
 
