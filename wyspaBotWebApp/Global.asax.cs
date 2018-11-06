@@ -24,7 +24,8 @@ namespace wyspaBotWebApp {
             var botName = ConfigurationManager.AppSettings["botName"];
             var channelName = ConfigurationManager.AppSettings["channelName"];
             var nasaApiKey = ConfigurationManager.AppSettings["nasaApiKey"];
-            IoC.Initialize(new Module[] {new ApplicationModule(pastebinApiKey, channelName, botName, nasaApiKey)});
+            var markovSourceFilePath = ConfigurationManager.AppSettings["markovSourceFilePath"];
+            IoC.Initialize(new Module[] {new ApplicationModule(pastebinApiKey, channelName, botName, nasaApiKey, markovSourceFilePath) });
             SpotifyApiWrapperInitializer.Initialize(clientId, secretId);
         }
 

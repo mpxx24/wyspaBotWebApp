@@ -3,15 +3,20 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
+using NLog;
 
 namespace wyspaBotWebApp.Services {
     public class RequestsService : IRequestsService {
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         public string GetData(string address) {
             var request = (HttpWebRequest) WebRequest.Create(address);
             request.Method = "GET";
             request.ContentType = "application/json";
 
             try {
+                this.logger.Debug($"GetDate called. Request address {address}");
+
                 var response = request.GetResponse();
                 using (var responseStream = response.GetResponseStream()) {
                     if (responseStream != null) {
@@ -28,14 +33,14 @@ namespace wyspaBotWebApp.Services {
                     if (responseStream != null) {
                         var reader = new StreamReader(responseStream, Encoding.UTF8);
                         var errorText = reader.ReadToEnd();
-                        //TODO: log
+                        this.logger.Debug($"Web exception occured. Error text: {errorText}");
                     }
                     return string.Empty;
                 }
             }
             catch (Exception e) {
-                //TODO: log
-                throw;
+                this.logger.Debug(e, $"Exception occured while doing a request on address {address}");
+                throw e;
             }
         }
 
@@ -63,8 +68,8 @@ namespace wyspaBotWebApp.Services {
                 }
             }
             catch (Exception e) {
-                //TODO: log
-                throw;
+                this.logger.Debug(e, $"Exception occured while doing a request on address {address}");
+                throw e;
             }
         }
 
@@ -81,8 +86,8 @@ namespace wyspaBotWebApp.Services {
                 }
             }
             catch (Exception e) {
-                //TODO: log;
-                throw;
+                this.logger.Debug(e, $"Exception occured while doing a request on address {address}");
+                throw e;
             }
         }
     }

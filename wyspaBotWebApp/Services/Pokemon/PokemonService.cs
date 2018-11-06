@@ -21,81 +21,82 @@ namespace wyspaBotWebApp.Services.Pokemon {
         }
 
         public IEnumerable<string> PerformBattle(string challengerName, string opponentName) {
-            if (challengerName == opponentName) {
-                return new List<string>{"You can't fight yourself..."};
-            }
-
-            var fullBattle = new List<string> {$"{challengerName} and {opponentName} - it's time to d-d-d-d-d-duel!"};
-            var pokeBattleRecord = new PokeBattleResult();
-
-            var pokemonOfFirstPLayer = this.GetRandomPokemonForPlayer();
-            var pokemonOfSecondPlayer = this.GetRandomPokemonForPlayer();
-
-            if (pokemonOfFirstPLayer.id == pokemonOfSecondPlayer.id) {
-                while (pokemonOfSecondPlayer.id == pokemonOfFirstPLayer.id) {
-                    pokemonOfSecondPlayer = this.GetRandomPokemonForPlayer();
-                }
-            }
-
-            fullBattle.Add($"{challengerName}'s pokemon is {pokemonOfFirstPLayer.name}! - {opponentName}'s pokemon is {pokemonOfSecondPlayer.name}!");
-            fullBattle.Add("FIGHT!");
-
-            var rand = new Random();
-
-            var firstPokemonsHealth = pokemonOfFirstPLayer.stats?.FirstOrDefault(x => x.stat.name == "hp")?.base_stat;
-            var secondPokemonsHealth = pokemonOfSecondPlayer.stats?.FirstOrDefault(x => x.stat.name == "hp")?.base_stat;
-
-            fullBattle.Add($"{pokemonOfFirstPLayer.name}'s HP: {firstPokemonsHealth} - {pokemonOfSecondPlayer.name}'s HP: {secondPokemonsHealth}");
-
-            var battle = new StringBuilder();
-            while (firstPokemonsHealth > 0 && secondPokemonsHealth > 0) {
-                var firstPokemonAbilityDmg = rand.Next(secondPokemonsHealth.Value + 1);
-                var secondPokemonAbilityDmg = rand.Next(firstPokemonsHealth.Value + 1);
-
-                if (rand.Next(100) % 30 == 0) {
-                    firstPokemonAbilityDmg *= 2;
-                    secondPokemonsHealth -= firstPokemonAbilityDmg;
-                }
-                else {
-                    secondPokemonsHealth -= firstPokemonAbilityDmg;
-                }
-
-                if (rand.Next(100) % 30 == 0) {
-                    secondPokemonAbilityDmg *= 2;
-                    firstPokemonsHealth -= secondPokemonAbilityDmg;
-                }
-                else {
-                    firstPokemonsHealth -= secondPokemonAbilityDmg;
-                }
-
-                battle.Append($"({firstPokemonsHealth} - {secondPokemonsHealth}),");
-            }
-            battle.Length -= 1;
-            fullBattle.Add(battle.ToString());
-
-            if (firstPokemonsHealth <= 0 && secondPokemonsHealth <= 0) {
-                pokeBattleRecord.PlayerNick = challengerName;
-                pokeBattleRecord.OpponentNick = opponentName;
-                pokeBattleRecord.WinnerNick = string.Empty;
-                pokeBattleRecord.WinningPokemonName = string.Empty;
-                pokeBattleRecord.LoosingPokemonName = string.Empty;
-
-                fullBattle.Add("TIE!");
-            }
-            else {
-                var winner = firstPokemonsHealth > secondPokemonsHealth ? challengerName : opponentName;
-                var winningPokemon = firstPokemonsHealth > secondPokemonsHealth ? pokemonOfFirstPLayer : pokemonOfSecondPlayer;
-
-                pokeBattleRecord.PlayerNick = challengerName;
-                pokeBattleRecord.OpponentNick = opponentName;
-                pokeBattleRecord.WinnerNick = winner;
-                pokeBattleRecord.WinningPokemonName = winningPokemon.name;
-                pokeBattleRecord.LoosingPokemonName = winningPokemon == pokemonOfFirstPLayer ? pokemonOfSecondPlayer.name : pokemonOfFirstPLayer.name;
-
-                fullBattle.Add($"{winner} and his {winningPokemon.name} WON!");
-            }
-
             try {
+
+                if (challengerName == opponentName) {
+                    return new List<string> {"You can't fight yourself..."};
+                }
+
+                var fullBattle = new List<string> {$"{challengerName} and {opponentName} - it's time to d-d-d-d-d-duel!"};
+                var pokeBattleRecord = new PokeBattleResult();
+
+                var pokemonOfFirstPLayer = this.GetRandomPokemonForPlayer();
+                var pokemonOfSecondPlayer = this.GetRandomPokemonForPlayer();
+
+                if (pokemonOfFirstPLayer.id == pokemonOfSecondPlayer.id) {
+                    while (pokemonOfSecondPlayer.id == pokemonOfFirstPLayer.id) {
+                        pokemonOfSecondPlayer = this.GetRandomPokemonForPlayer();
+                    }
+                }
+
+                fullBattle.Add($"{challengerName}'s pokemon is {pokemonOfFirstPLayer.name}! - {opponentName}'s pokemon is {pokemonOfSecondPlayer.name}!");
+                fullBattle.Add("FIGHT!");
+
+                var rand = new Random();
+
+                var firstPokemonsHealth = pokemonOfFirstPLayer.stats?.FirstOrDefault(x => x.stat.name == "hp")?.base_stat;
+                var secondPokemonsHealth = pokemonOfSecondPlayer.stats?.FirstOrDefault(x => x.stat.name == "hp")?.base_stat;
+
+                fullBattle.Add($"{pokemonOfFirstPLayer.name}'s HP: {firstPokemonsHealth} - {pokemonOfSecondPlayer.name}'s HP: {secondPokemonsHealth}");
+
+                var battle = new StringBuilder();
+                while (firstPokemonsHealth > 0 && secondPokemonsHealth > 0) {
+                    var firstPokemonAbilityDmg = rand.Next(secondPokemonsHealth.Value + 1);
+                    var secondPokemonAbilityDmg = rand.Next(firstPokemonsHealth.Value + 1);
+
+                    if (rand.Next(100) % 30 == 0) {
+                        firstPokemonAbilityDmg *= 2;
+                        secondPokemonsHealth -= firstPokemonAbilityDmg;
+                    }
+                    else {
+                        secondPokemonsHealth -= firstPokemonAbilityDmg;
+                    }
+
+                    if (rand.Next(100) % 30 == 0) {
+                        secondPokemonAbilityDmg *= 2;
+                        firstPokemonsHealth -= secondPokemonAbilityDmg;
+                    }
+                    else {
+                        firstPokemonsHealth -= secondPokemonAbilityDmg;
+                    }
+
+                    battle.Append($"({firstPokemonsHealth} - {secondPokemonsHealth}),");
+                }
+                battle.Length -= 1;
+                fullBattle.Add(battle.ToString());
+
+                if (firstPokemonsHealth <= 0 && secondPokemonsHealth <= 0) {
+                    pokeBattleRecord.PlayerNick = challengerName;
+                    pokeBattleRecord.OpponentNick = opponentName;
+                    pokeBattleRecord.WinnerNick = string.Empty;
+                    pokeBattleRecord.WinningPokemonName = string.Empty;
+                    pokeBattleRecord.LoosingPokemonName = string.Empty;
+
+                    fullBattle.Add("TIE!");
+                }
+                else {
+                    var winner = firstPokemonsHealth > secondPokemonsHealth ? challengerName : opponentName;
+                    var winningPokemon = firstPokemonsHealth > secondPokemonsHealth ? pokemonOfFirstPLayer : pokemonOfSecondPlayer;
+
+                    pokeBattleRecord.PlayerNick = challengerName;
+                    pokeBattleRecord.OpponentNick = opponentName;
+                    pokeBattleRecord.WinnerNick = winner;
+                    pokeBattleRecord.WinningPokemonName = winningPokemon.name;
+                    pokeBattleRecord.LoosingPokemonName = winningPokemon == pokemonOfFirstPLayer ? pokemonOfSecondPlayer.name : pokemonOfFirstPLayer.name;
+
+                    fullBattle.Add($"{winner} and his {winningPokemon.name} WON!");
+                }
+
                 this.pokeBattleRepository.Save(pokeBattleRecord);
 
                 return fullBattle;

@@ -6,6 +6,7 @@ using NHibernate;
 using wyspaBotWebApp.Services;
 using wyspaBotWebApp.Services.Calendar;
 using wyspaBotWebApp.Services.GoogleMaps;
+using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
 
@@ -15,12 +16,14 @@ namespace wyspaBotWebApp.Core {
         private readonly string channelName;
         private readonly string nasaApiKey;
         private readonly string pastebinApiDevKey;
+        private readonly string markovSourceFilePath;
 
-        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey) {
+        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey, string markovSourceFilePath) {
             this.pastebinApiDevKey = pastebinApiDevKey;
             this.channelName = channelName;
             this.botName = botName;
             this.nasaApiKey = nasaApiKey;
+            this.markovSourceFilePath = markovSourceFilePath;
         }
 
         protected override void Load(ContainerBuilder builder) {
@@ -40,15 +43,11 @@ namespace wyspaBotWebApp.Core {
             builder.RegisterType<CalendarService>().As<ICalendarService>();
             builder.RegisterType<NasaApiService>().As<INasaApiService>()
                    .WithParameter(new NamedParameter("apiKey", this.nasaApiKey));
-
-            //builder.RegisterType<BotConfigurationService>().Named<IBotConfigurationService>("botConfigService");
-            //builder.RegisterDecorator<IBotConfigurationService>((c, inner) => new BotConfigurationServiceDecorator(inner), "botConfigService");
-
-            //builder.RegisterType<PasteBinApiService>().As<IPasteBinApiService>()
-            //       .WithParameter(new NamedParameter("pastebinApiDevKey", this.pastebinApiDevKey));
+            builder.RegisterType<MarkovService>().As<IMarkovService>()
+                .WithParameter(new NamedParameter("markovSourceFilePath", this.markovSourceFilePath))
+                .SingleInstance();
 
             builder.RegisterControllers(typeof(MvcApplication).Assembly).InstancePerRequest();
-            //builder.RegisterAssemblyModules(typeof(MvcApplication).Assembly);
             builder.RegisterModule<AutofacWebTypesModule>();
         }
     }

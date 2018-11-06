@@ -7,9 +7,12 @@ using System.Threading;
 using MarkovSharp.TokenisationStrategies;
 using NLog;
 using wyspaBotWebApp.Core;
+using wyspaBotWebApp.Services.Markov;
 
 namespace wyspaBotWebApp.Services {
     public class WyspaBotService : IWyspaBotService {
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         private readonly string botName;
         private readonly string channel;
 
@@ -25,14 +28,14 @@ namespace wyspaBotWebApp.Services {
         private TcpClient irc;
         private readonly string server = "irc.freenode.net";
         private readonly List<string> lastInnerException = new List<string>();
-        private readonly StringMarkov markovChainModel = new StringMarkov(2);
         private bool shouldStartSavingMessages;
 
-        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
+        private readonly IMarkovService markovService;
 
-        public WyspaBotService(string channel, string botName) {
+        public WyspaBotService(string channel, string botName, IMarkovService markovService) {
             this.channel = channel;
             this.botName = botName;
+            this.markovService = markovService;
             this.user = $"USER {this.botName} 0 * :{this.botName}";
         }
 
@@ -47,12 +50,17 @@ namespace wyspaBotWebApp.Services {
                 this.writer.Flush();
                 this.writer.WriteLine(this.user);
                 this.writer.Flush();
+
+                this.markovService.Initialize(2);
+
                 this.ReadChat();
             }
             catch (Exception e) {
                 this.logger.Debug(e, "Exception occured!");
                 this.WyspaBotSay(CommandType.LogErrorCommand, "Something went wrong (>ლ)");
+
                 this.lastInnerException.Clear();
+
                 var excSplit = e.InnerException?.ToString().Split(new[] {"\r\n"}, StringSplitOptions.None);
                 if (excSplit != null) {
                     foreach (var m in excSplit) {
@@ -134,7 +142,7 @@ namespace wyspaBotWebApp.Services {
 
                     if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.Contains(this.botName)) {
                         //this.postedMessages.Add(phrase);
-                        this.markovChainModel.Learn(phrase);
+                        this.markovService.Learn(phrase);
                     }
 
                     if (splitInput.Count >= 4 && splitInput[3].Trim() == this.throwingTableString || splitInput.Count >= 5 && (splitInput[3] + splitInput[4]).Trim() == this.throwingTableString) {
@@ -238,7 +246,7 @@ namespace wyspaBotWebApp.Services {
                                 break;
                             case "-markov":
                             case "markov":
-                                var message = this.markovChainModel.Walk().First();
+                                var message = this.markovService.GetText();
                                 this.WyspaBotDebug(new List<string>{message});
                                 break;
                             case "-addevent":
