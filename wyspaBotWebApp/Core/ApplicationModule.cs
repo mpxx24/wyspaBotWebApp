@@ -9,6 +9,7 @@ using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
+using wyspaBotWebApp.Services.WorldCup;
 
 namespace wyspaBotWebApp.Core {
     public class ApplicationModule : Module {

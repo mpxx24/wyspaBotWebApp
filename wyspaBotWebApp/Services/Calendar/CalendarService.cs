@@ -25,11 +25,11 @@ namespace wyspaBotWebApp.Services.Calendar {
                     AddedBy = dto.AddedBy
                 };
                 this.repository.Save(calendarEvent);
-                this.logger.Debug($"Added new calendar entry: Name {dto.Name}, date {dto.When.ToShortDateString()}");
+                this.logger.Debug($"Added new calendar entry: Name {dto.Name}, date {dto.When.ToString(ApplicationSettingsHelper.DateTimeFormat)}");
             }
             catch (Exception e) {
                 this.logger.Debug(e, "Failed to add new calendar entry!");
-                throw;
+                throw e;
             }
         }
 
@@ -49,13 +49,15 @@ namespace wyspaBotWebApp.Services.Calendar {
             }
             catch (Exception e) {
                 this.logger.Debug(e, "Failed to get all calendar entries!");
-                throw;
+                throw e;
             }
         }
 
         public CalendarEventDto GetNextEntry() {
             try {
-                var closestInTimeEntry = this.repository.GetAll().Where(x => x.When > DateTime.Now && Math.Abs(DateTime.Now.Ticks - x.When.Date.Ticks) > 0)
+                //ToList() is used as a hack because NHibernate for some reason refuses work with this query
+                var closestInTimeEntry = this.repository.GetAll().ToList()
+                                             .Where(x => x.When > DateTime.Now && Math.Abs(DateTime.Now.Ticks - x.When.Date.Ticks) > 0)
                                              .OrderBy(x => x.When)
                                              .FirstOrDefault();
 
@@ -74,8 +76,8 @@ namespace wyspaBotWebApp.Services.Calendar {
                 };
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Failed to get the next entry!");
-                throw;
+                this.logger.Debug(e, $"Failed to get the next entry! {e.Message}");
+                throw e;
             }
         }
     }

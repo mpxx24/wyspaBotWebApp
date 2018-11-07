@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using wyspaBotWebApp.Services.WorldCup;
 
-namespace wyspaBotWebApp.Services {
+namespace wyspaBotWebApp.Services.WorldCup {
     public interface IWorldCupService {
         IEnumerable<WorldCupApiData> GetData(string address);
     }

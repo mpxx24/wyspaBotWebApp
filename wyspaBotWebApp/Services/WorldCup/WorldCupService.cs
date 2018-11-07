@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
-using wyspaBotWebApp.Services.WorldCup;
 
-namespace wyspaBotWebApp.Services {
+namespace wyspaBotWebApp.Services.WorldCup {
     public class WorldCupService : IWorldCupService {
         private readonly IRequestsService requestsService;
 

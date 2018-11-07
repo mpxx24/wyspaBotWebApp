@@ -177,14 +177,14 @@ namespace wyspaBotWebApp.Services {
                                     this.WyspaBotSay(CommandType.RecommendedTracksBasedOnTrackCommand, trackId, limit);
                                 }
                                 break;
-                            case "-wct":
-                            case "wct":
-                                this.WyspaBotSay(CommandType.TodaysWorldCupGamesCommand);
-                                break;
-                            case "-wcy":
-                            case "wcy":
-                                this.WyspaBotSay(CommandType.YesterdaysWorldCupGamesAndScoresCommand);
-                                break;
+                            //case "-wct":
+                            //case "wct":
+                            //    this.WyspaBotSay(CommandType.TodaysWorldCupGamesCommand);
+                            //    break;
+                            //case "-wcy":
+                            //case "wcy":
+                            //    this.WyspaBotSay(CommandType.YesterdaysWorldCupGamesAndScoresCommand);
+                            //    break;
                             //case "-pbin":
                             //    if (splitInput.Count >= 6) {
                             //        var numberOfMessagesToSave = splitInput[5];

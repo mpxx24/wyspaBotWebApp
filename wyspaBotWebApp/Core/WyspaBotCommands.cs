@@ -8,20 +8,29 @@ using wyspaBotWebApp.Services.Calendar;
 using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
+using wyspaBotWebApp.Services.WorldCup;
 
 //TODO: move some of the logic to services
 namespace wyspaBotWebApp.Core {
     public class HelpCommand : ICommand {
         public IEnumerable<string> GetText() {
             return new List<string> {
+                "Commands are not case sensitive abd can be used with or without '-'",
+                "",
                 "Allowed commands:",
-                "   -help -h -> show whole bot api",
-                "   -rtracks <track id> <limit (default: 10)> -> get tracks recommended based on given track id",
-                "   -wct -> today's world cup games",
-                "   -wcy -> yesterday's world cup games",
-                //"   -wiki <text> <lang (PL/EN)>-> wikipedia's definition (BETA :P)",
+                "   help h -> show whole bot api",
+                "   rtracks <track id> <limit (default: 10)> -> get tracks recommended based on given track id",
+                //"   -wct -> today's world cup games",
+                //"   -wcy -> yesterday's world cup games",
                 //"   -pbin <numberOfLines>" -> save last <numberOfLines> messages to pastebin,
-                "   -ghrepo link to github repository",
+                "   ghrepo -> link to github repository",
+                "   pokebattle <nick> -> pokemon battle",
+                "   pbstats -> pokemon battle stats",
+                "   markov -> generate text from string markov",
+                "   addevent <name> - <place> <date/number of days from now> -> add new event",
+                "   listevents -> list all added events (from the future)",
+                "   nextevent -> list next event (closest in time)",
+                "   npod -> NASA's picture of the day",
                 "",
                 "Throwing tables is not allowed!"
             };
@@ -79,7 +88,7 @@ namespace wyspaBotWebApp.Core {
 
     public class GetRepositoryAddressCommand : ICommand {
         public IEnumerable<string> GetText() {
-            return new List<string> { "https://github.com/mpxx24/wyspaBotWebApp" };
+            return new List<string> {"https://github.com/mpxx24/wyspaBotWebApp"};
         }
     }
 
@@ -92,21 +101,23 @@ namespace wyspaBotWebApp.Core {
     public class ClearPokeBattleStatsCommand : ICommand {
         public IEnumerable<string> GetText() {
             IoC.Resolve<IPokemonService>().ClearStats();
-            return new List<string>{"Stats has been cleared."};
+            return new List<string> {"Stats has been cleared."};
         }
     }
 
     public class GetNextEventCommand : ICommand {
         public IEnumerable<string> GetText() {
             var nextEntry = IoC.Resolve<ICalendarService>().GetNextEntry();
-            return new List<string>{$"{nextEntry.Name} - {nextEntry.Place} - {nextEntry.When.ToShortDateString()}"};
+            return nextEntry == null
+                ? new List<string> {"No events defined!"}
+                : new List<string> {$"{nextEntry.Name} - {nextEntry.Place} - {nextEntry.When.ToString(ApplicationSettingsHelper.DateTimeFormat)}"};
         }
     }
 
     public class ListAllEventsCommand : ICommand {
         public IEnumerable<string> GetText() {
             var allEntries = IoC.Resolve<ICalendarService>().GetAllEntries();
-            return allEntries.Select(x => $"{x.Name} - {x.Place} - {x.When.ToShortDateString()}");
+            return allEntries.Select(x => $"{x.Name} - {x.Place} - {x.When.ToString(ApplicationSettingsHelper.DateTimeFormat)}");
         }
     }
 
@@ -149,8 +160,8 @@ namespace wyspaBotWebApp.Core {
     public class PokeBattleCommand : ICommandWithStringIenumerableParameter {
         public IEnumerable<string> GetText(IEnumerable<string> parameter) {
             var listOfNames = parameter as IList<string> ?? parameter.ToList();
-            return listOfNames.Count != 2 
-                ? new List<string> {$"Inconsistent data. Expected 2 parameters but got {listOfNames.Count}"} 
+            return listOfNames.Count != 2
+                ? new List<string> {$"Inconsistent data. Expected 2 parameters but got {listOfNames.Count}"}
                 : IoC.Resolve<IPokemonService>().PerformBattle(listOfNames.First(), listOfNames.Last());
         }
     }
@@ -185,7 +196,7 @@ namespace wyspaBotWebApp.Core {
     public class GoogleMapDistanceCommand : ICommandWithStringIenumerableParameter {
         public IEnumerable<string> GetText(IEnumerable<string> parameters) {
             var p = parameters as IList<string> ?? parameters.ToList();
-           
+
             return IoC.Resolve<IGoogleMapsService>().GetDistance(p[0], p[1]);
         }
     }
@@ -196,7 +207,7 @@ namespace wyspaBotWebApp.Core {
             var p = parameters as IList<string> ?? parameters.ToList();
 
             if (p.Count != 4) {
-                return new List<string>{"Invalid number of parameters!"};
+                return new List<string> {"Invalid number of parameters!"};
             }
 
             var when = new DateTime();
@@ -212,10 +223,10 @@ namespace wyspaBotWebApp.Core {
                 Added = DateTime.Now,
                 Name = p[1],
                 Place = p[2],
-                When = when 
+                When = when
             };
             IoC.Resolve<ICalendarService>().AddEntry(calendatDto);
-            return new List<string>{"New event added!"};
+            return new List<string> {"New event added!"};
         }
     }
 
