@@ -8,6 +8,7 @@ using MarkovSharp.TokenisationStrategies;
 using NLog;
 using wyspaBotWebApp.Core;
 using wyspaBotWebApp.Services.Markov;
+using wyspaBotWebApp.Services.Youtube;
 
 namespace wyspaBotWebApp.Services {
     public class WyspaBotService : IWyspaBotService {
@@ -31,11 +32,13 @@ namespace wyspaBotWebApp.Services {
         private bool shouldStartSavingMessages;
 
         private readonly IMarkovService markovService;
+        private readonly IYoutubeService youtubeService;
 
-        public WyspaBotService(string channel, string botName, IMarkovService markovService) {
+        public WyspaBotService(string channel, string botName, IMarkovService markovService, IYoutubeService youtubeService) {
             this.channel = channel;
             this.botName = botName;
             this.markovService = markovService;
+            this.youtubeService = youtubeService;
             this.user = $"USER {this.botName} 0 * :{this.botName}";
         }
 
@@ -143,6 +146,16 @@ namespace wyspaBotWebApp.Services {
                     if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.Contains(this.botName)) {
                         //this.postedMessages.Add(phrase);
                         this.markovService.Learn(phrase);
+                    }
+
+                    if (splitInput.Count >= 4 && this.youtubeService.IsYoutubeLink(phrase)) {
+                        this.WyspaBotSay(CommandType.GetYoutubeVideoTitleCommand, phrase);
+                    }
+                    else if (splitInput.Count >= 4 && splitInput.Any(x => this.youtubeService.IsYoutubeLink(x))) {
+                        var link = splitInput.FirstOrDefault(x => this.youtubeService.IsYoutubeLink(x));
+                        if (!string.IsNullOrEmpty(link)) {
+                            this.WyspaBotSay(CommandType.GetYoutubeVideoTitleCommand, link);
+                        }
                     }
 
                     if (splitInput.Count >= 4 && splitInput[3].Trim() == this.throwingTableString || splitInput.Count >= 5 && (splitInput[3] + splitInput[4]).Trim() == this.throwingTableString) {

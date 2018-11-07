@@ -9,6 +9,7 @@ using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
 using wyspaBotWebApp.Services.WorldCup;
+using wyspaBotWebApp.Services.Youtube;
 
 //TODO: move some of the logic to services
 namespace wyspaBotWebApp.Core {
@@ -154,6 +155,16 @@ namespace wyspaBotWebApp.Core {
 
             var playlists = PlaylistsWrapper.GetUsersPlaylists(parameter);
             return playlists.Select(x => x.Name);
+        }
+    }
+    public class GetYoutubeVideoTitleCommand : ICommandWithStringParameter {
+        public IEnumerable<string> GetText(string parameter) {
+            if (string.IsNullOrEmpty(parameter)) {
+                return new List<string> {"Link not provided!"};
+            }
+
+            var title = IoC.Resolve<IYoutubeService>().GetVideoName(parameter);
+            return new List<string>{title};
         }
     }
 

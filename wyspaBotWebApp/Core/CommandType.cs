@@ -22,6 +22,7 @@
         GetNextEventCommand = 19,
         ListAllEventsCommand = 20,
         NasaPictureOfTheDayCommand = 21,
+        GetYoutubeVideoTitleCommand = 22,
 
         LogErrorCommand = 999,
     }

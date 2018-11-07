@@ -10,6 +10,7 @@ using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
 using wyspaBotWebApp.Services.WorldCup;
+using wyspaBotWebApp.Services.Youtube;
 
 namespace wyspaBotWebApp.Core {
     public class ApplicationModule : Module {
@@ -18,13 +19,15 @@ namespace wyspaBotWebApp.Core {
         private readonly string nasaApiKey;
         private readonly string pastebinApiDevKey;
         private readonly string markovSourceFilePath;
+        private readonly string youtubeApiKey;
 
-        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey, string markovSourceFilePath) {
+        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey, string markovSourceFilePath, string youtubeApiKey) {
             this.pastebinApiDevKey = pastebinApiDevKey;
             this.channelName = channelName;
             this.botName = botName;
             this.nasaApiKey = nasaApiKey;
             this.markovSourceFilePath = markovSourceFilePath;
+            this.youtubeApiKey = youtubeApiKey;
         }
 
         protected override void Load(ContainerBuilder builder) {
@@ -47,6 +50,8 @@ namespace wyspaBotWebApp.Core {
             builder.RegisterType<MarkovService>().As<IMarkovService>()
                 .WithParameter(new NamedParameter("markovSourceFilePath", this.markovSourceFilePath))
                 .SingleInstance();
+            builder.RegisterType<YoutubeService>().As<IYoutubeService>()
+                   .WithParameter(new NamedParameter("youtubeApiKey", this.youtubeApiKey));
 
             builder.RegisterControllers(typeof(MvcApplication).Assembly).InstancePerRequest();
             builder.RegisterModule<AutofacWebTypesModule>();

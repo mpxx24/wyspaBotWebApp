@@ -45,6 +45,8 @@ namespace wyspaBotWebApp.Core {
                     return new LogErrorCommand();
                 case CommandType.UserplaylistsCommand:
                     return new UserplaylistsCommand();
+                case CommandType.GetYoutubeVideoTitleCommand:
+                    return new GetYoutubeVideoTitleCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }
