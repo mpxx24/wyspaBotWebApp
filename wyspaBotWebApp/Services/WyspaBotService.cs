@@ -148,11 +148,11 @@ namespace wyspaBotWebApp.Services {
                         this.markovService.Learn(phrase);
                     }
 
-                    if (splitInput.Count >= 4 && this.youtubeService.IsYoutubeLink(phrase)) {
+                    if (splitInput.Count >= 4 && this.youtubeService.IsYoutubeVideoLink(phrase)) {
                         this.WyspaBotSay(CommandType.GetYoutubeVideoTitleCommand, phrase);
                     }
-                    else if (splitInput.Count >= 4 && splitInput.Any(x => this.youtubeService.IsYoutubeLink(x))) {
-                        var link = splitInput.FirstOrDefault(x => this.youtubeService.IsYoutubeLink(x));
+                    else if (splitInput.Count >= 4 && splitInput.Any(x => this.youtubeService.IsYoutubeVideoLink(x))) {
+                        var link = splitInput.FirstOrDefault(x => this.youtubeService.IsYoutubeVideoLink(x));
                         if (!string.IsNullOrEmpty(link)) {
                             this.WyspaBotSay(CommandType.GetYoutubeVideoTitleCommand, link);
                         }
