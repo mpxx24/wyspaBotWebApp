@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
-using MarkovSharp.TokenisationStrategies;
 using NLog;
 using wyspaBotWebApp.Core;
 using wyspaBotWebApp.Services.Markov;
@@ -14,16 +13,13 @@ namespace wyspaBotWebApp.Services {
     public class WyspaBotService : IWyspaBotService {
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly string botName;
-        private readonly string channel;
-
         private StreamWriter writer;
         private StreamReader reader;
         private readonly string messageAlias = "PRIVMSG";
         private readonly int port = 6667;
         private readonly List<string> postedMessages = new List<string>();
         private readonly List<string> chatUsers = new List<string>();
-        private readonly List<string> textFaces = new List<string> { "( ͡° ͜ʖ ͡°)", "(ง ͠° ͟ل͜ ͡°)ง", "(ง'̀-'́)ง", "☜(ﾟヮﾟ☜)", "~(˘▾˘~)", "༼ つ  ͡° ͜ʖ ͡° ༽つ", "(ง°ل͜°)ง" };
+        private readonly List<string> textFaces = new List<string> {"( ͡° ͜ʖ ͡°)", "(ง ͠° ͟ل͜ ͡°)ง", "(ง'̀-'́)ง", "☜(ﾟヮﾟ☜)", "~(˘▾˘~)", "༼ つ  ͡° ͜ʖ ͡° ༽つ", "(ง°ل͜°)ง"};
         private readonly string throwingTableString = ":(╯°□°）╯︵┻━┻";
         private readonly string user;
         private TcpClient irc;
@@ -31,6 +27,8 @@ namespace wyspaBotWebApp.Services {
         private readonly List<string> lastInnerException = new List<string>();
         private bool shouldStartSavingMessages;
 
+        private readonly string botName;
+        private readonly string channel;
         private readonly IMarkovService markovService;
         private readonly IYoutubeService youtubeService;
 
@@ -60,19 +58,8 @@ namespace wyspaBotWebApp.Services {
             }
             catch (Exception e) {
                 this.logger.Debug(e, "Exception occured!");
-                this.WyspaBotSay(CommandType.LogErrorCommand, "Something went wrong (>ლ)");
 
-                this.lastInnerException.Clear();
-
-                var excSplit = e.InnerException?.ToString().Split(new[] {"\r\n"}, StringSplitOptions.None);
-                if (excSplit != null) {
-                    foreach (var m in excSplit) {
-                        if (m.Contains("End of inner exception stack trace")) {
-                            break;
-                        }
-                        this.lastInnerException.Add(m);
-                    }
-                }
+                this.SaveLastInnerException(e);
             }
         }
 
@@ -88,219 +75,227 @@ namespace wyspaBotWebApp.Services {
                 string inputLine;
                 var separator = $"{this.channel} :";
                 while ((inputLine = this.reader.ReadLine()) != null) {
-                    var splitInput = inputLine.Split(' ').ToList();
-                    var phrase = inputLine.Substring(inputLine.IndexOf(separator, StringComparison.Ordinal) + separator.Length);
+                    try {
+                        var splitInput = inputLine.Split(' ').ToList();
+                        var phrase = inputLine.Substring(inputLine.IndexOf(separator, StringComparison.Ordinal) + separator.Length);
 
-                    if (splitInput[0] == "PING") {
-                        var pongReply = splitInput[1];
-                        this.SendData("PONG " + pongReply);
-                    }
-
-                    if (splitInput[1] == "001") {
-                        var joinString = "JOIN " + this.channel;
-                        this.SendData(joinString);
-                    }
-
-                    if (splitInput[1] == "NICK") {
-                        var previousNick = this.GetUserNick(splitInput);
-                        if (this.chatUsers.Any(x => x == previousNick)) {
-                            var indexOf = this.chatUsers.IndexOf(previousNick);
-                            this.chatUsers[indexOf] = splitInput[2].Substring(1, splitInput[2].Length - 1);
-                        } else if (this.chatUsers.Any(x => x == $"@{previousNick}")) {
-                            var indexOf = this.chatUsers.IndexOf($"@{previousNick}");
-                            this.chatUsers[indexOf] = splitInput[2].Substring(1, splitInput[2].Length - 1);
-                        }
-                    }
-
-                    if (splitInput.Count >= 6 && splitInput[2] == this.botName && (splitInput[3] == "@" || splitInput[3] == "=") && splitInput[4] == this.channel) {
-                        this.chatUsers.Clear();
-                        var numberOfPeopleInChat = splitInput.Count - 6;
-                        
-                        for (var i = 0; i < numberOfPeopleInChat; i++) {
-                            this.chatUsers.Add(splitInput[6 + i]);
+                        if (splitInput[0] == "PING") {
+                            var pongReply = splitInput[1];
+                            this.SendData("PONG " + pongReply);
                         }
 
-                        this.WyspaBotSay(CommandType.SayHelloAfterJoining, this.chatUsers);
-                    }
+                        if (splitInput[1] == "001") {
+                            var joinString = "JOIN " + this.channel;
+                            this.SendData(joinString);
+                        }
 
-                    if (splitInput[1] == "JOIN") {
-                        var nick = this.GetUserNick(splitInput);
-                        if (nick != this.botName) {
-                            var indexOf = this.chatUsers.IndexOf(nick);
-                            if (indexOf != -1) {
-                                this.chatUsers.Add(nick);
+                        if (splitInput[1] == "NICK") {
+                            var previousNick = this.GetUserNick(splitInput);
+                            if (this.chatUsers.Any(x => x == previousNick)) {
+                                var indexOf = this.chatUsers.IndexOf(previousNick);
+                                this.chatUsers[indexOf] = splitInput[2].Substring(1, splitInput[2].Length - 1);
                             }
-                            var random = new Random();
-
-                            var parameters = new List<string> {nick, this.channel, this.textFaces[random.Next(this.textFaces.Count)]};
-                            this.WyspaBotSay(CommandType.SayHelloToNewcomerCommand, parameters);
-                        }
-                    }
-
-                    if (splitInput.Count >= 3 && splitInput[1] == this.messageAlias && splitInput[2] == this.botName) {
-                        var nick = this.GetUserNick(splitInput);
-                        this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
-                        this.shouldStartSavingMessages = true;
-                    }
-
-                    if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.Contains(this.botName)) {
-                        //this.postedMessages.Add(phrase);
-                        this.markovService.Learn(phrase);
-                    }
-
-                    if (splitInput.Count >= 4 && this.youtubeService.IsYoutubeVideoLink(phrase)) {
-                        this.WyspaBotSay(CommandType.GetYoutubeVideoTitleCommand, phrase);
-                    }
-                    else if (splitInput.Count >= 4 && splitInput.Any(x => this.youtubeService.IsYoutubeVideoLink(x))) {
-                        var link = splitInput.FirstOrDefault(x => this.youtubeService.IsYoutubeVideoLink(x));
-                        if (!string.IsNullOrEmpty(link)) {
-                            this.WyspaBotSay(CommandType.GetYoutubeVideoTitleCommand, link);
-                        }
-                    }
-
-                    if (splitInput.Count >= 4 && splitInput[3].Trim() == this.throwingTableString || splitInput.Count >= 5 && (splitInput[3] + splitInput[4]).Trim() == this.throwingTableString) {
-                        this.WyspaBotSay(CommandType.PutTheTableBackCommand);
-                    }
-
-                    if (splitInput.Count >= 4 && (splitInput[3] == $":{this.botName}" || splitInput[3] == $":{this.botName}:")) {
-                        if (splitInput.Count == 4) {
-                            splitInput.Add(string.Empty);
+                            else if (this.chatUsers.Any(x => x == $"@{previousNick}")) {
+                                var indexOf = this.chatUsers.IndexOf($"@{previousNick}");
+                                this.chatUsers[indexOf] = splitInput[2].Substring(1, splitInput[2].Length - 1);
+                            }
                         }
 
-                        switch (splitInput[4].Trim().ToLowerInvariant()) {
-                            case "":
-                                this.WyspaBotSay(CommandType.IntroduceYourselfCommand, this.botName);
-                                break;
-                            case "-help":
-                            case "help":
-                            case "-h":
-                                this.WyspaBotSay(CommandType.HelpCommand);
-                                break;
-                            case "-rtracks":
-                            case "rtracks":
-                                if (splitInput.Count >= 6) {
-                                    var trackId = splitInput[5];
-                                    var limit = 10;
+                        if (splitInput.Count >= 6 && splitInput[2] == this.botName && (splitInput[3] == "@" || splitInput[3] == "=") && splitInput[4] == this.channel) {
+                            this.chatUsers.Clear();
+                            var numberOfPeopleInChat = splitInput.Count - 6;
 
-                                    if (splitInput.Count >= 7) {
-                                        var limitAsString = splitInput[6];
-                                        int.TryParse(limitAsString, out limit);
-                                    }
+                            for (var i = 0; i < numberOfPeopleInChat; i++) {
+                                this.chatUsers.Add(splitInput[6 + i]);
+                            }
 
-                                    this.WyspaBotSay(CommandType.RecommendedTracksBasedOnTrackCommand, trackId, limit);
+                            this.WyspaBotSay(CommandType.SayHelloAfterJoining, this.chatUsers);
+                        }
+
+                        if (splitInput[1] == "JOIN") {
+                            var nick = this.GetUserNick(splitInput);
+                            if (nick != this.botName) {
+                                var indexOf = this.chatUsers.IndexOf(nick);
+                                if (indexOf != -1) {
+                                    this.chatUsers.Add(nick);
                                 }
-                                break;
-                            //case "-wct":
-                            //case "wct":
-                            //    this.WyspaBotSay(CommandType.TodaysWorldCupGamesCommand);
-                            //    break;
-                            //case "-wcy":
-                            //case "wcy":
-                            //    this.WyspaBotSay(CommandType.YesterdaysWorldCupGamesAndScoresCommand);
-                            //    break;
-                            //case "-pbin":
-                            //    if (splitInput.Count >= 6) {
-                            //        var numberOfMessagesToSave = splitInput[5];
-                            //        var isNumber = int.TryParse(numberOfMessagesToSave, out var limit);
+                                var random = new Random();
 
-                            //        if (isNumber) {
-                            //            var messages = postedMessages.Skip(Math.Max(0, postedMessages.Count - limit));
-                            //            this.WyspaBotSay(CommandType.PasteToPastebinCommand, messages);
-                            //        }
-                            //        else {
-                            //            this.WyspaBotSay(CommandType.LogErrorCommand, $"Provided parameter <${nameof(limit)}> is not a number");
-                            //        }
-                            //    }
-                            //    break;
-                            case "-cltmp":
-                                this.postedMessages.Clear();
-                                break;
-                            case "-pokebattle":
-                            case "pokebattle":
-                                if (splitInput.Count >= 6) {
-                                    var opponentName = splitInput[5];
+                                var parameters = new List<string> {nick, this.channel, this.textFaces[random.Next(this.textFaces.Count)]};
+                                this.WyspaBotSay(CommandType.SayHelloToNewcomerCommand, parameters);
+                            }
+                        }
 
-                                    if (!this.chatUsers.Contains(opponentName)) {
-                                        this.WyspaBotSay(CommandType.LogErrorCommand, $"User \"{opponentName}\" does not exist.");
+                        if (splitInput.Count >= 3 && splitInput[1] == this.messageAlias && splitInput[2] == this.botName) {
+                            var nick = this.GetUserNick(splitInput);
+                            this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
+                            this.shouldStartSavingMessages = true;
+                        }
+
+                        if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.Contains(this.botName)) {
+                            //this.postedMessages.Add(phrase);
+                            this.markovService.Learn(phrase);
+                        }
+
+                        if (splitInput.Count >= 4 && this.youtubeService.IsYoutubeVideoLink(phrase)) {
+                            this.WyspaBotSay(CommandType.GetYoutubeVideoTitleCommand, phrase);
+                        }
+                        else if (splitInput.Count >= 4 && splitInput.Any(x => this.youtubeService.IsYoutubeVideoLink(x))) {
+                            var link = splitInput.FirstOrDefault(x => this.youtubeService.IsYoutubeVideoLink(x));
+                            if (!string.IsNullOrEmpty(link)) {
+                                this.WyspaBotSay(CommandType.GetYoutubeVideoTitleCommand, link);
+                            }
+                        }
+
+                        if (splitInput.Count >= 4 && splitInput[3].Trim() == this.throwingTableString || splitInput.Count >= 5 && (splitInput[3] + splitInput[4]).Trim() == this.throwingTableString) {
+                            this.WyspaBotSay(CommandType.PutTheTableBackCommand);
+                        }
+
+                        if (splitInput.Count >= 4 && (splitInput[3] == $":{this.botName}" || splitInput[3] == $":{this.botName}:")) {
+                            if (splitInput.Count == 4) {
+                                splitInput.Add(string.Empty);
+                            }
+
+                            switch (splitInput[4].Trim().ToLowerInvariant()) {
+                                case "":
+                                    this.WyspaBotSay(CommandType.IntroduceYourselfCommand, this.botName);
+                                    break;
+                                case "-help":
+                                case "help":
+                                case "-h":
+                                    this.WyspaBotSay(CommandType.HelpCommand);
+                                    break;
+                                case "-rtracks":
+                                case "rtracks":
+                                    if (splitInput.Count >= 6) {
+                                        var trackId = splitInput[5];
+                                        var limit = 10;
+
+                                        if (splitInput.Count >= 7) {
+                                            var limitAsString = splitInput[6];
+                                            int.TryParse(limitAsString, out limit);
+                                        }
+
+                                        this.WyspaBotSay(CommandType.RecommendedTracksBasedOnTrackCommand, trackId, limit);
+                                    }
+                                    break;
+                                //case "-wct":
+                                //case "wct":
+                                //    this.WyspaBotSay(CommandType.TodaysWorldCupGamesCommand);
+                                //    break;
+                                //case "-wcy":
+                                //case "wcy":
+                                //    this.WyspaBotSay(CommandType.YesterdaysWorldCupGamesAndScoresCommand);
+                                //    break;
+                                //case "-pbin":
+                                //    if (splitInput.Count >= 6) {
+                                //        var numberOfMessagesToSave = splitInput[5];
+                                //        var isNumber = int.TryParse(numberOfMessagesToSave, out var limit);
+
+                                //        if (isNumber) {
+                                //            var messages = postedMessages.Skip(Math.Max(0, postedMessages.Count - limit));
+                                //            this.WyspaBotSay(CommandType.PasteToPastebinCommand, messages);
+                                //        }
+                                //        else {
+                                //            this.WyspaBotSay(CommandType.LogErrorCommand, $"Provided parameter <${nameof(limit)}> is not a number");
+                                //        }
+                                //    }
+                                //    break;
+                                case "-cltmp":
+                                    this.postedMessages.Clear();
+                                    break;
+                                case "-pokebattle":
+                                case "pokebattle":
+                                    if (splitInput.Count >= 6) {
+                                        var opponentName = splitInput[5];
+
+                                        if (!this.chatUsers.Contains(opponentName)) {
+                                            this.WyspaBotSay(CommandType.LogErrorCommand, $"User \"{opponentName}\" does not exist.");
+                                        }
+                                        else {
+                                            var nick = new List<string> {this.GetUserNick(splitInput), opponentName};
+
+                                            this.WyspaBotSay(CommandType.PokeBattleCommand, nick);
+                                        }
                                     }
                                     else {
-                                        var nick = new List<string>{this.GetUserNick(splitInput), opponentName};
-
-                                        this.WyspaBotSay(CommandType.PokeBattleCommand, nick);
+                                        this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify opponent's name!)");
                                     }
-                                }
-                                else {
-                                    this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify opponent's name!)");
-                                }
-                                break;
-                            case "-ghrepo":
-                            case "ghrepo":
-                                this.WyspaBotSay(CommandType.GetRepositoryAddressCommand);
-                                break;
-                            case "-pbstats":
-                            case "pbstats":
-                                this.WyspaBotSay(CommandType.PokeBattleStatsCommand);
-                                break;
-                            case "-clpbs":
-                            case "clpbs":
-                                this.WyspaBotSay(CommandType.ClearPokeBattleStatsCommand);
-                                break;
-                            case "-gmdistance":
-                            case "gmdistance":
-                                if (splitInput.Count >= 7) {
-                                    var origin = splitInput[5];
-                                    var destination = splitInput[6];
+                                    break;
+                                case "-ghrepo":
+                                case "ghrepo":
+                                    this.WyspaBotSay(CommandType.GetRepositoryAddressCommand);
+                                    break;
+                                case "-pbstats":
+                                case "pbstats":
+                                    this.WyspaBotSay(CommandType.PokeBattleStatsCommand);
+                                    break;
+                                case "-clpbs":
+                                case "clpbs":
+                                    this.WyspaBotSay(CommandType.ClearPokeBattleStatsCommand);
+                                    break;
+                                case "-gmdistance":
+                                case "gmdistance":
+                                    if (splitInput.Count >= 7) {
+                                        var origin = splitInput[5];
+                                        var destination = splitInput[6];
 
-                                    this.WyspaBotSay(CommandType.GoogleMapDistanceCommand, new List<string>{origin, destination});
-                                }
-                                else {
-                                    this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: origin and destination!)");
-                                }
-                                break;
-                            case "-markov":
-                            case "markov":
-                                var message = this.markovService.GetText();
-                                this.WyspaBotDebug(new List<string>{message});
-                                break;
-                            case "-addevent":
-                            case "addevent":
-                                if (splitInput.Count >= 7) {
-                                    var whoAdded = this.GetUserNick(splitInput);
-                                    var realPrhase = this.GetPhraseWithoutCommandAndBotName(phrase, "addevent");
-
-                                    var realArguments = realPrhase.Split('-').Select(x => x.Trim()).ToList();
-                                    if (realArguments.Count != 3) {
-                                        this.WyspaBotSay(CommandType.LogErrorCommand, "You need to pass exactly 3 parameters seperated by '-' sign!");
-                                        break;
+                                        this.WyspaBotSay(CommandType.GoogleMapDistanceCommand, new List<string> {origin, destination});
                                     }
+                                    else {
+                                        this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: origin and destination!)");
+                                    }
+                                    break;
+                                case "-markov":
+                                case "markov":
+                                    var message = this.markovService.GetText();
+                                    this.WyspaBotDebug(new List<string> {message});
+                                    break;
+                                case "-addevent":
+                                case "addevent":
+                                    if (splitInput.Count >= 7) {
+                                        var whoAdded = this.GetUserNick(splitInput);
+                                        var realPrhase = this.GetPhraseWithoutCommandAndBotName(phrase, "addevent");
 
-                                    this.WyspaBotSay(CommandType.AddEventCommand, new List<string> {whoAdded, realArguments[0], realArguments[1], realArguments[2]});
-                                }
-                                else {
-                                    this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: event name and time!)");
-                                }
-                                break;
-                            case "-listevents":
-                            case "listevents":
-                                this.WyspaBotSay(CommandType.ListAllEventsCommand);
-                                break;
-                            case "-nextevent":
-                            case "nextevent":
-                                this.WyspaBotSay(CommandType.GetNextEventCommand);
-                                break;
-                            case "-npod":
-                            case "npod":
-                                this.WyspaBotSay(CommandType.NasaPictureOfTheDayCommand);
-                                break;
-                            case "-debug":
-                                this.WyspaBotDebug(this.lastInnerException);
-                                break;
-                            default:
-                                if (splitInput.Any(x => x.Contains(this.botName))) {
-                                    this.WyspaBotSay(CommandType.ResponseWhenMentionedCommand);
-                                }
-                                break;
+                                        var realArguments = realPrhase.Split('-').Select(x => x.Trim()).ToList();
+                                        if (realArguments.Count != 3) {
+                                            this.WyspaBotSay(CommandType.LogErrorCommand, "You need to pass exactly 3 parameters seperated by '-' sign!");
+                                            break;
+                                        }
+
+                                        this.WyspaBotSay(CommandType.AddEventCommand, new List<string> {whoAdded, realArguments[0], realArguments[1], realArguments[2]});
+                                    }
+                                    else {
+                                        this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: event name and time!)");
+                                    }
+                                    break;
+                                case "-listevents":
+                                case "listevents":
+                                    this.WyspaBotSay(CommandType.ListAllEventsCommand);
+                                    break;
+                                case "-nextevent":
+                                case "nextevent":
+                                    this.WyspaBotSay(CommandType.GetNextEventCommand);
+                                    break;
+                                case "-npod":
+                                case "npod":
+                                    this.WyspaBotSay(CommandType.NasaPictureOfTheDayCommand);
+                                    break;
+                                case "-debug":
+                                    this.WyspaBotDebug(this.lastInnerException);
+                                    break;
+                                default:
+                                    if (splitInput.Any(x => x.Contains(this.botName))) {
+                                        this.WyspaBotSay(CommandType.ResponseWhenMentionedCommand);
+                                    }
+                                    break;
+                            }
                         }
+                    }
+                    catch (Exception e) {
+                        this.logger.Debug(e, $"Failed to generate command response! Text {inputLine}");
+
+                        this.SaveLastInnerException(e);
                     }
                 }
             }
@@ -393,6 +388,22 @@ namespace wyspaBotWebApp.Services {
                 : doesPhraseContainCommand
                     ? phrase.Remove(indexOfCommand, command.Length)
                     : phrase;
+        }
+
+
+        private void SaveLastInnerException(Exception e) {
+            this.WyspaBotSay(CommandType.LogErrorCommand, "Something went wrong (>ლ)");
+            this.lastInnerException.Clear();
+
+            var excSplit = e.InnerException?.ToString().Split(new[] {"\r\n"}, StringSplitOptions.None);
+            if (excSplit != null) {
+                foreach (var m in excSplit) {
+                    if (m.Contains("End of inner exception stack trace")) {
+                        break;
+                    }
+                    this.lastInnerException.Add(m);
+                }
+            }
         }
     }
 }

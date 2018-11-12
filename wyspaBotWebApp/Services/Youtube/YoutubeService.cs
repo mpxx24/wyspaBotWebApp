@@ -15,6 +15,9 @@ namespace wyspaBotWebApp.Services.Youtube {
 
         private readonly string youtubeComeUrl = "youtube.com/";
         private readonly string youtuBeUrl = "youtu.be/";
+        private readonly string vElement = "v=";
+        private readonly string tElement = "t=";
+        private readonly string featureElement = "feature=";
 
         public YoutubeService(IRequestsService requestsService, string youtubeApiKey) {
             this.requestsService = requestsService;
@@ -41,18 +44,18 @@ namespace wyspaBotWebApp.Services.Youtube {
                 return false;
             }
 
-            return text.Contains(this.youtubeComeUrl) && text.Contains("v=") || text.Contains(this.youtuBeUrl) && this.IsShortYoutubeLink(text);
+            return text.Contains(this.youtubeComeUrl) && text.Contains(this.vElement) || text.Contains(this.youtuBeUrl) && this.IsShortYoutubeLink(text);
         }
 
         public string GetVideoId(string link) {
             link = link.Trim();
-            if (link.Contains("feature=")) {
-                var timeIndex = link.IndexOf("feature=", StringComparison.InvariantCulture);
+            if (link.Contains(this.featureElement)) {
+                var timeIndex = link.IndexOf(this.featureElement, StringComparison.InvariantCulture);
                 link = link.Substring(0, timeIndex - 1);
             }
 
-            if (link.Contains("t=")) {
-                var timeIndex = link.IndexOf("t=", StringComparison.InvariantCulture);
+            if (link.Contains(this.tElement)) {
+                var timeIndex = link.IndexOf(this.tElement, StringComparison.InvariantCulture);
                 link = link.Substring(0, timeIndex - 1);
             }
 
@@ -60,8 +63,8 @@ namespace wyspaBotWebApp.Services.Youtube {
             var isYoutubeShort = link.Contains(this.youtuBeUrl);
 
             if (isYoutube) {
-                var indexFrom = link.IndexOf("v=", StringComparison.InvariantCulture);
-                return link.Substring(indexFrom, link.Length - indexFrom).Replace("v=", string.Empty);
+                var indexFrom = link.IndexOf(this.vElement, StringComparison.InvariantCulture);
+                return link.Substring(indexFrom, link.Length - indexFrom).Replace(this.vElement, string.Empty);
             }
             else if (isYoutubeShort) {
                 var indexOfUrl = link.IndexOf(this.youtuBeUrl, StringComparison.InvariantCulture);
