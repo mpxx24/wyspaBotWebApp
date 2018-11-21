@@ -23,7 +23,7 @@ namespace wyspaBotWebApp.Services.NasaApi {
                 return JsonConvert.DeserializeObject<NasaApiPictureOfTheDayRootObject>(data);
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Failed to fetch NASA's picture of the day!");
+                this.logger.Debug($"Failed to fetch NASA's picture of the day! {e}");
                 throw;
             }
         }

@@ -24,7 +24,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
                 return JsonConvert.DeserializeObject<PokemonApiRootObject>(pokemonJson);
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Failed to fetch random pokemon!");
+                this.logger.Debug($"Failed to fetch random pokemon! {e}");
                 throw e;
             }
         }

@@ -102,7 +102,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
                 return fullBattle;
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Exception occured while perfoming poke battle");
+                this.logger.Debug($"Exception occured while perfoming poke battle. {e}");
                 throw;
             }
         }

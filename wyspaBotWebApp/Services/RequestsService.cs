@@ -15,7 +15,7 @@ namespace wyspaBotWebApp.Services {
             request.ContentType = "application/json";
 
             try {
-                this.logger.Debug($"GetDate called. Request address {address}");
+                this.logger.Debug($"GetData called. Request address {address}");
 
                 var response = request.GetResponse();
                 using (var responseStream = response.GetResponseStream()) {
@@ -39,7 +39,7 @@ namespace wyspaBotWebApp.Services {
                 }
             }
             catch (Exception e) {
-                this.logger.Debug(e, $"Exception occured while doing a request on address {address}");
+                this.logger.Debug($"Exception occured while doing a request on address {address}. {e}");
                 throw e;
             }
         }
@@ -68,7 +68,7 @@ namespace wyspaBotWebApp.Services {
                 }
             }
             catch (Exception e) {
-                this.logger.Debug(e, $"Exception occured while doing a request on address {address}");
+                this.logger.Debug($"Exception occured while doing a request on address {address}. {e}");
                 throw e;
             }
         }
@@ -86,7 +86,7 @@ namespace wyspaBotWebApp.Services {
                 }
             }
             catch (Exception e) {
-                this.logger.Debug(e, $"Exception occured while doing a request on address {address}");
+                this.logger.Debug($"Exception occured while doing a request on address {address}. {e}");
                 throw e;
             }
         }

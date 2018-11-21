@@ -28,7 +28,7 @@ namespace wyspaBotWebApp.Services.Calendar {
                 this.logger.Debug($"Added new calendar entry: Name {dto.Name}, date {dto.When.ToString(ApplicationSettingsHelper.DateTimeFormat)}");
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Failed to add new calendar entry!");
+                this.logger.Debug($"Failed to add new calendar entry! {e}");
                 throw e;
             }
         }
@@ -48,7 +48,7 @@ namespace wyspaBotWebApp.Services.Calendar {
                 });
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Failed to get all calendar entries!");
+                this.logger.Debug($"Failed to get all calendar entries! {e}");
                 throw e;
             }
         }
@@ -76,7 +76,7 @@ namespace wyspaBotWebApp.Services.Calendar {
                 };
             }
             catch (Exception e) {
-                this.logger.Debug(e, $"Failed to get the next entry! {e.Message}");
+                this.logger.Debug($"Failed to get the next entry! {e}");
                 throw e;
             }
         }

@@ -57,7 +57,7 @@ namespace wyspaBotWebApp.Services {
                 this.ReadChat();
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Exception occured!");
+                this.logger.Debug($"Exception occured! {e}");
 
                 this.SaveLastInnerException(e);
             }
@@ -91,13 +91,17 @@ namespace wyspaBotWebApp.Services {
 
                         if (splitInput[1] == "NICK") {
                             var previousNick = this.GetUserNick(splitInput);
+                            var newNick = splitInput[2].Substring(1, splitInput[2].Length - 1);
                             if (this.chatUsers.Any(x => x == previousNick)) {
                                 var indexOf = this.chatUsers.IndexOf(previousNick);
-                                this.chatUsers[indexOf] = splitInput[2].Substring(1, splitInput[2].Length - 1);
+                                this.chatUsers[indexOf] = newNick;
                             }
                             else if (this.chatUsers.Any(x => x == $"@{previousNick}")) {
                                 var indexOf = this.chatUsers.IndexOf($"@{previousNick}");
-                                this.chatUsers[indexOf] = splitInput[2].Substring(1, splitInput[2].Length - 1);
+                                this.chatUsers[indexOf] = newNick;
+                            }
+                            else {
+                                this.chatUsers.Add(newNick);
                             }
                         }
 
@@ -293,7 +297,7 @@ namespace wyspaBotWebApp.Services {
                         }
                     }
                     catch (Exception e) {
-                        this.logger.Debug(e, $"Failed to generate command response! Text {inputLine}");
+                        this.logger.Debug($"Failed to generate command response! Text {inputLine}. {e}");
 
                         this.SaveLastInnerException(e);
                     }

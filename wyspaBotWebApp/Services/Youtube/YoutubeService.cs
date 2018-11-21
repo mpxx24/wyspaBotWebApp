@@ -33,7 +33,7 @@ namespace wyspaBotWebApp.Services.Youtube {
                 return responseAsObject?.Items[0]?.Snippet?.Title ?? string.Empty;
             }
             catch (Exception e) {
-                this.logger.Debug(e, $"Failed to retrieve youtube video metadata! Link: {link}");
+                this.logger.Debug($"Failed to retrieve youtube video metadata! Link: {link}. {e}");
                 throw;
             }
         }
