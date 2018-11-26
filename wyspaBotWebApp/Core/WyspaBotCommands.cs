@@ -241,6 +241,14 @@ namespace wyspaBotWebApp.Core {
         }
     }
 
+    public class SayHelloToAllInTheChatCommand : ICommandWithStringIenumerableParameter {
+        public IEnumerable<string> GetText(IEnumerable<string> parameters) {
+            var p = parameters as IList<string> ?? parameters.ToList();
+
+            return new List<string> {$"Hello {string.Join(" ", p)}"};
+        }
+    }
+
     //TODO: refactor
     public class RecommendedTracksBasedOnTrackCommand : ICommandWithTwoParameters {
         public IEnumerable<string> GetText(string parameter, int value) {

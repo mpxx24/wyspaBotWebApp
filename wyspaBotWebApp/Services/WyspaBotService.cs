@@ -296,6 +296,11 @@ namespace wyspaBotWebApp.Services {
                                 case "-debug":
                                     this.WyspaBotDebug(this.lastInnerException);
                                     break;
+                                case "-hello":
+                                case "hello":
+                                    var user = this.GetUserNick(splitInput);
+                                    this.WyspaBotSay(CommandType.SayHelloToAllInTheChat, this.chatUsers.Where(x => !x.StartsWith("@") && x != user));
+                                    break;
                                 default:
                                     if (splitInput.Any(x => x.Contains(this.botName))) {
                                         this.WyspaBotSay(CommandType.ResponseWhenMentionedCommand);

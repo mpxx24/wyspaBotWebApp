@@ -68,6 +68,8 @@ namespace wyspaBotWebApp.Core {
                     return new GoogleMapDistanceCommand();
                 case CommandType.AddEventCommand:
                     return new AddNewEventCommand();
+                case CommandType.SayHelloToAllInTheChat:
+                    return new SayHelloToAllInTheChatCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }

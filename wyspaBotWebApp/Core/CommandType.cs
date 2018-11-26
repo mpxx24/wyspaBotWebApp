@@ -23,6 +23,7 @@
         ListAllEventsCommand = 20,
         NasaPictureOfTheDayCommand = 21,
         GetYoutubeVideoTitleCommand = 22,
+        SayHelloToAllInTheChat = 23,
 
         LogErrorCommand = 999,
     }
