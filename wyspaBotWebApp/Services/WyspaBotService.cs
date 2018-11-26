@@ -119,14 +119,22 @@ namespace wyspaBotWebApp.Services {
                         if (splitInput[1] == "JOIN") {
                             var nick = this.GetUserNick(splitInput);
                             if (nick != this.botName) {
-                                var indexOf = this.chatUsers.IndexOf(nick);
-                                if (indexOf != -1) {
+                                if (this.chatUsers.All(x => x != nick)) {
                                     this.chatUsers.Add(nick);
                                 }
                                 var random = new Random();
 
                                 var parameters = new List<string> {nick, this.channel, this.textFaces[random.Next(this.textFaces.Count)]};
                                 this.WyspaBotSay(CommandType.SayHelloToNewcomerCommand, parameters);
+                            }
+                        }
+
+                        if (splitInput[1] == "QUIT") {
+                            var nick = this.GetUserNick(splitInput);
+                            if (nick != this.botName) {
+                                if (this.chatUsers.Any(x => x == nick)) {
+                                    this.chatUsers.RemoveAll(x => x == nick);
+                                }
                             }
                         }
 
