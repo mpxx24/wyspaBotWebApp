@@ -24,6 +24,7 @@
         NasaPictureOfTheDayCommand = 21,
         GetYoutubeVideoTitleCommand = 22,
         SayHelloToAllInTheChat = 23,
+        WolframAlphaShortQuestionCommand = 24,
 
         LogErrorCommand = 999,
     }

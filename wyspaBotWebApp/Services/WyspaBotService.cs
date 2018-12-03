@@ -172,12 +172,10 @@ namespace wyspaBotWebApp.Services {
                                 case "":
                                     this.WyspaBotSay(CommandType.IntroduceYourselfCommand, this.botName);
                                     break;
-                                case "-help":
                                 case "help":
-                                case "-h":
+                                case "h":
                                     this.WyspaBotSay(CommandType.HelpCommand);
                                     break;
-                                case "-rtracks":
                                 case "rtracks":
                                     if (splitInput.Count >= 6) {
                                         var trackId = splitInput[5];
@@ -216,7 +214,6 @@ namespace wyspaBotWebApp.Services {
                                 case "-cltmp":
                                     this.postedMessages.Clear();
                                     break;
-                                case "-pokebattle":
                                 case "pokebattle":
                                     if (splitInput.Count >= 6) {
                                         var opponentName = splitInput[5];
@@ -234,19 +231,15 @@ namespace wyspaBotWebApp.Services {
                                         this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify opponent's name!)");
                                     }
                                     break;
-                                case "-ghrepo":
                                 case "ghrepo":
                                     this.WyspaBotSay(CommandType.GetRepositoryAddressCommand);
                                     break;
-                                case "-pbstats":
                                 case "pbstats":
                                     this.WyspaBotSay(CommandType.PokeBattleStatsCommand);
                                     break;
-                                case "-clpbs":
                                 case "clpbs":
                                     this.WyspaBotSay(CommandType.ClearPokeBattleStatsCommand);
                                     break;
-                                case "-gmdistance":
                                 case "gmdistance":
                                     if (splitInput.Count >= 7) {
                                         var origin = splitInput[5];
@@ -258,12 +251,10 @@ namespace wyspaBotWebApp.Services {
                                         this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: origin and destination!)");
                                     }
                                     break;
-                                case "-markov":
                                 case "markov":
                                     var message = this.markovService.GetText();
                                     this.WyspaBotDebug(new List<string> {message});
                                     break;
-                                case "-addevent":
                                 case "addevent":
                                     if (splitInput.Count >= 7) {
                                         var whoAdded = this.GetUserNick(splitInput);
@@ -281,25 +272,25 @@ namespace wyspaBotWebApp.Services {
                                         this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: event name and time!)");
                                     }
                                     break;
-                                case "-listevents":
                                 case "listevents":
                                     this.WyspaBotSay(CommandType.ListAllEventsCommand);
                                     break;
-                                case "-nextevent":
                                 case "nextevent":
                                     this.WyspaBotSay(CommandType.GetNextEventCommand);
                                     break;
-                                case "-npod":
                                 case "npod":
                                     this.WyspaBotSay(CommandType.NasaPictureOfTheDayCommand);
                                     break;
                                 case "-debug":
                                     this.WyspaBotDebug(this.lastInnerException);
                                     break;
-                                case "-hello":
                                 case "hello":
-                                    var user = this.GetUserNick(splitInput);
-                                    this.WyspaBotSay(CommandType.SayHelloToAllInTheChat, this.chatUsers.Where(x => !x.StartsWith("@") && x != user));
+                                    var userNick = this.GetUserNick(splitInput);
+                                    this.WyspaBotSay(CommandType.SayHelloToAllInTheChat, this.chatUsers.Where(x => !x.StartsWith("@") && x != userNick));
+                                    break;
+                                case "askq":
+                                    var question = this.GetPhraseWithoutCommandAndBotName(phrase, "askq");
+                                    this.WyspaBotSay(CommandType.WolframAlphaShortQuestionCommand, question);
                                     break;
                                 default:
                                     if (splitInput.Any(x => x.Contains(this.botName))) {

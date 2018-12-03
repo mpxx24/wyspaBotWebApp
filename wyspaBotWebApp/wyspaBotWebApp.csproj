@@ -263,6 +263,8 @@
     <Compile Include="Core\WyspaBotCommands.cs" />
     <Compile Include="Core\WyspaBotFactories.cs" />
     <Compile Include="Services\IWyspaBotService.cs" />
+    <Compile Include="Services\WolframAlpha\IWolframAlphaService.cs" />
+    <Compile Include="Services\WolframAlpha\WolframAlphaService.cs" />
     <Compile Include="Services\WorldCup\IWorldCupService.cs" />
     <Compile Include="Services\WorldCup\WorldCupApiClasses.cs" />
     <Compile Include="Services\WorldCup\WorldCupService.cs" />

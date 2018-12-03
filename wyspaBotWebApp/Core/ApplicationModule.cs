@@ -9,6 +9,7 @@ using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
+using wyspaBotWebApp.Services.WolframAlpha;
 using wyspaBotWebApp.Services.WorldCup;
 using wyspaBotWebApp.Services.Youtube;
 
@@ -20,14 +21,16 @@ namespace wyspaBotWebApp.Core {
         private readonly string pastebinApiDevKey;
         private readonly string markovSourceFilePath;
         private readonly string youtubeApiKey;
+        private readonly string wolframAlphaAppId;
 
-        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey, string markovSourceFilePath, string youtubeApiKey) {
+        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey, string markovSourceFilePath, string youtubeApiKey, string wolframAlphaAppId) {
             this.pastebinApiDevKey = pastebinApiDevKey;
             this.channelName = channelName;
             this.botName = botName;
             this.nasaApiKey = nasaApiKey;
             this.markovSourceFilePath = markovSourceFilePath;
             this.youtubeApiKey = youtubeApiKey;
+            this.wolframAlphaAppId = wolframAlphaAppId;
         }
 
         protected override void Load(ContainerBuilder builder) {
@@ -52,6 +55,8 @@ namespace wyspaBotWebApp.Core {
                 .SingleInstance();
             builder.RegisterType<YoutubeService>().As<IYoutubeService>()
                    .WithParameter(new NamedParameter("youtubeApiKey", this.youtubeApiKey));
+            builder.RegisterType<WolframAlphaService>().As<IWolframAlphaService>()
+                   .WithParameter(new NamedParameter("wolframAlphaAppId", this.wolframAlphaAppId));
 
             builder.RegisterControllers(typeof(MvcApplication).Assembly).InstancePerRequest();
             builder.RegisterModule<AutofacWebTypesModule>();

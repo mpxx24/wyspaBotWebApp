@@ -8,6 +8,7 @@ using wyspaBotWebApp.Services.Calendar;
 using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.Pokemon;
+using wyspaBotWebApp.Services.WolframAlpha;
 using wyspaBotWebApp.Services.WorldCup;
 using wyspaBotWebApp.Services.Youtube;
 
@@ -16,7 +17,7 @@ namespace wyspaBotWebApp.Core {
     public class HelpCommand : ICommand {
         public IEnumerable<string> GetText() {
             return new List<string> {
-                "Commands are not case sensitive abd can be used with or without '-'",
+                "Commands are not case sensitive",
                 "",
                 "Allowed commands:",
                 "   help h -> show whole bot api",
@@ -32,6 +33,8 @@ namespace wyspaBotWebApp.Core {
                 "   listevents -> list all added events (from the future)",
                 "   nextevent -> list next event (closest in time)",
                 "   npod -> NASA's picture of the day",
+                "   hello -> hello everyone!",
+                "   asqq <question> -> ask bot a question (ENG)",
                 "",
                 "Throwing tables is not allowed!"
             };
@@ -157,6 +160,7 @@ namespace wyspaBotWebApp.Core {
             return playlists.Select(x => x.Name);
         }
     }
+
     public class GetYoutubeVideoTitleCommand : ICommandWithStringParameter {
         public IEnumerable<string> GetText(string parameter) {
             if (string.IsNullOrEmpty(parameter)) {
@@ -165,6 +169,17 @@ namespace wyspaBotWebApp.Core {
 
             var title = IoC.Resolve<IYoutubeService>().GetVideoName(parameter);
             return new List<string>{title};
+        }
+    }
+
+    public class WolframAlphaShortQuestionCommand : ICommandWithStringParameter {
+        public IEnumerable<string> GetText(string parameter) {
+            if (string.IsNullOrEmpty(parameter)) {
+                return new List<string> {"Question not provided!"};
+            }
+
+            var answer = IoC.Resolve<IWolframAlphaService>().GetShortAnswer(parameter);
+            return new List<string>{string.IsNullOrEmpty(answer) ? "I don't know :(" : answer};
         }
     }
 
