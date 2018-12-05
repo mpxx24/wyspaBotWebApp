@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -7,12 +8,14 @@ using Autofac;
 using NLog;
 using SpotifyApiWrapper.Core;
 using wyspaBotWebApp.Core;
+using wyspaBotWebApp.Services.Markov;
 
 namespace wyspaBotWebApp {
     public class MvcApplication : HttpApplication {
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         protected void Application_Start() {
+            this.logger.Debug("Application start!");
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
@@ -32,8 +35,24 @@ namespace wyspaBotWebApp {
         }
 
         protected void Application_Error() {
+            this.logger.Debug("Application error!");
+            IoC.Resolve<IMarkovService>().PersistMarkovObject();
+
             var exc = this.Server.GetLastError();
             this.logger.Error(exc);
+        }
+
+        public void Application_End() {
+            this.logger.Debug("Application end!");
+            IoC.Resolve<IMarkovService>().PersistMarkovObject();
+        }
+
+        protected void Session_End(object sender, EventArgs e) {
+            //hacks!
+            if (IoC.IsInitialized) {
+                this.logger.Debug("Session end!");
+                IoC.Resolve<IMarkovService>().PersistMarkovObject();
+            }
         }
     }
 }

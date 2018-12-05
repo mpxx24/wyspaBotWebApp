@@ -5,5 +5,7 @@
         void Learn(string sentence);
 
         string GetText();
+
+        void PersistMarkovObject();
     }
 }

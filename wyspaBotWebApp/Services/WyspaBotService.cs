@@ -65,6 +65,7 @@ namespace wyspaBotWebApp.Services {
 
         public void StopBot() {
             this.logger.Debug($"Stopping {this.botName}!");
+            this.markovService.PersistMarkovObject();
             this.chatUsers.Clear();
             this.irc.Close();
         }

@@ -8,6 +8,8 @@ namespace wyspaBotWebApp.Core {
 
         private static ContainerBuilder builder;
 
+        public static bool IsInitialized;
+
         public static T Resolve<T>() {
             return container.Resolve<T>();
         }
@@ -27,6 +29,8 @@ namespace wyspaBotWebApp.Core {
             container = builder.Build();
 
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
+
+            IsInitialized = true;
         }
     }
 }

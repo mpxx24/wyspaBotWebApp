@@ -31,24 +31,44 @@ namespace wyspaBotWebApp.Services.Markov {
             return this.stringMarkov.Walk().First();
         }
 
+        public void PersistMarkovObject() {
+            try {
+                this.logger.Debug("Trying to persist string markov state!");
+
+                using (var sw = new StreamWriter(this.markovSourceFilePath, false)) {
+                    this.logger.Debug($"{this.stringMarkov.SourcePhrases.Count} elements!");
+                    foreach (var sourceLine in this.stringMarkov.SourcePhrases) {
+                        sw.WriteLine(sourceLine);
+                    }
+                }
+                
+                this.logger.Debug("Successfully persisted string markov state.");
+            }
+            catch (Exception e) {
+                this.logger.Debug($"Failed to persist string markov state! {e}");
+                throw e;
+            }
+        }
+
         private void LearnInitialData() {
             try {
-                var path = Path.Combine(this.markovSourceFilePath, @"markov initial source.txt");
+                this.logger.Debug($"Passing initial data for markov model to learn. '{this.markovSourceFilePath}'");
 
-                this.logger.Debug($"Passing initial data for markov model to learn. {path}");
-
-                if (!File.Exists(path)) {
-                    this.logger.Debug($"Failed to pass initial data to string markov model! File {path} doesn't exist");
+                if (!File.Exists(this.markovSourceFilePath)) {
+                    this.logger.Debug($"Failed to pass initial data to string markov model! File '{this.markovSourceFilePath}' doesn't exist");
                     return;
                 }
 
-                var file = File.ReadAllLines(path);
+                var file = File.ReadAllLines(this.markovSourceFilePath);
+
+                this.logger.Debug($"Initial source contains {file.Length} items!");
+
                 foreach (var s in file) {
                     this.Learn(s);
                 }
             }
             catch (Exception e) {
-                this.logger.Debug(e, "Exception occured while passing initial data for markov model to learn.");
+                this.logger.Debug($"Exception occured while passing initial data for markov model to learn. {e}");
                 throw e;
             }
         }
