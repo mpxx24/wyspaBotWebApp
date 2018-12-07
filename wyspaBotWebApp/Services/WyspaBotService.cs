@@ -383,8 +383,13 @@ namespace wyspaBotWebApp.Services {
             var commandWithDash = $"-{command}";
             var fullBotName = $"{this.botName}:";
 
-            var indexOfBotName = phrase.IndexOf(fullBotName, StringComparison.InvariantCulture);
-            phrase = phrase.Remove(indexOfBotName, fullBotName.Length);
+            var indexOfFullBotName = phrase.IndexOf(fullBotName, StringComparison.InvariantCulture);
+
+            var isBotNameUsedWithColon = indexOfFullBotName != -1;
+            if (!isBotNameUsedWithColon) {
+                indexOfFullBotName = phrase.IndexOf(this.botName, StringComparison.InvariantCulture);
+            }
+            phrase = phrase.Remove(indexOfFullBotName, isBotNameUsedWithColon ? fullBotName.Length : this.botName.Length);
 
             var indexOfCommandWithDash = phrase.IndexOf(commandWithDash, StringComparison.InvariantCulture);
             var indexOfCommand = phrase.IndexOf(command, StringComparison.InvariantCulture);
@@ -398,7 +403,6 @@ namespace wyspaBotWebApp.Services {
                     ? phrase.Remove(indexOfCommand, command.Length)
                     : phrase;
         }
-
 
         private void SaveLastInnerException(Exception e) {
             this.WyspaBotSay(CommandType.LogErrorCommand, "Something went wrong (>ლ)");
