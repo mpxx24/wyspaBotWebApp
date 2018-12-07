@@ -32,20 +32,34 @@ namespace wyspaBotWebApp.Services.Markov {
         }
 
         public void PersistMarkovObject() {
+            var bufforFileName = $"{Path.GetDirectoryName(this.markovSourceFilePath)}\\{Path.GetFileNameWithoutExtension(this.markovSourceFilePath)}2.{Path.GetExtension(this.markovSourceFilePath)}";
+
             try {
                 this.logger.Debug("Trying to persist string markov state!");
+                if (File.Exists(this.markovSourceFilePath)) {
+                    this.logger.Debug("Creating initial source backup!");
+                    File.Copy(this.markovSourceFilePath, bufforFileName);
+                }
 
                 using (var sw = new StreamWriter(this.markovSourceFilePath, false)) {
-                    this.logger.Debug($"{this.stringMarkov.SourcePhrases.Count} elements!");
                     foreach (var sourceLine in this.stringMarkov.SourcePhrases) {
                         sw.WriteLine(sourceLine);
                     }
                 }
-                
+
                 this.logger.Debug("Successfully persisted string markov state.");
+
+                this.logger.Debug("Removing initial source backup.");
+                File.Delete(bufforFileName);
             }
             catch (Exception e) {
                 this.logger.Debug($"Failed to persist string markov state! {e}");
+                if (File.Exists(bufforFileName) && File.Exists(this.markovSourceFilePath)) {
+                    this.logger.Debug("Rollback initial source file.");
+                    File.Delete(this.markovSourceFilePath);
+                    File.Copy(bufforFileName, this.markovSourceFilePath);
+                    File.Delete(bufforFileName);
+                }
                 throw e;
             }
         }
