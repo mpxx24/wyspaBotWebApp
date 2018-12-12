@@ -2,9 +2,9 @@
 using System.Collections.Specialized;
 using System.Text;
 
-namespace wyspaBotWebApp.Services {
+namespace wyspaBotWebApp.Services.PasteBin {
     public class PasteBinApiService : IPasteBinApiService {
-        private readonly string loginUrl = "http://pastebin.com/api/api_login.php";
+        private readonly string loginUrl = "http://pastebin.com/api/api_post.php";
         private readonly string pastebinApiDevKey;
         private readonly IRequestsService requestsService;
 
@@ -23,6 +23,7 @@ namespace wyspaBotWebApp.Services {
             var parameters = new NameValueCollection {
                 {"api_dev_key", this.pastebinApiDevKey},
                 {"api_option", "paste"},
+                {"api_paste_name", "history"},
                 {"api_paste_code", sb.ToString()}
             };
 

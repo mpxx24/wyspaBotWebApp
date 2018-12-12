@@ -8,6 +8,7 @@ using wyspaBotWebApp.Services.Calendar;
 using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.NasaApi;
+using wyspaBotWebApp.Services.PasteBin;
 using wyspaBotWebApp.Services.Pokemon;
 using wyspaBotWebApp.Services.WolframAlpha;
 using wyspaBotWebApp.Services.WorldCup;
@@ -44,19 +45,27 @@ namespace wyspaBotWebApp.Core {
                        new NamedParameter("botName", this.botName),
                        new NamedParameter("channel", this.channelName)
                    }).SingleInstance();
+
             builder.RegisterType<PokemonApiService>().As<IPokemonApiService>();
             builder.RegisterType<PokemonService>().As<IPokemonService>();
             builder.RegisterType<GoogleMapsService>().As<IGoogleMapsService>();
             builder.RegisterType<CalendarService>().As<ICalendarService>();
             builder.RegisterType<NasaApiService>().As<INasaApiService>()
                    .WithParameter(new NamedParameter("apiKey", this.nasaApiKey));
+
             builder.RegisterType<MarkovService>().As<IMarkovService>()
-                .WithParameter(new NamedParameter("markovSourceFilePath", this.markovSourceFilePath))
-                .SingleInstance();
+                   .WithParameter(new NamedParameter("markovSourceFilePath", this.markovSourceFilePath))
+                   .WithParameter(new NamedParameter("level", 2))
+                   .SingleInstance();
+
             builder.RegisterType<YoutubeService>().As<IYoutubeService>()
                    .WithParameter(new NamedParameter("youtubeApiKey", this.youtubeApiKey));
+
             builder.RegisterType<WolframAlphaService>().As<IWolframAlphaService>()
                    .WithParameter(new NamedParameter("wolframAlphaAppId", this.wolframAlphaAppId));
+
+            builder.RegisterType<PasteBinApiService>().As<IPasteBinApiService>()
+                   .WithParameter(new NamedParameter("pastebinApiDevKey", this.pastebinApiDevKey));
 
             builder.RegisterControllers(typeof(MvcApplication).Assembly).InstancePerRequest();
             builder.RegisterModule<AutofacWebTypesModule>();

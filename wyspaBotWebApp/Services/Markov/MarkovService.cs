@@ -12,15 +12,11 @@ namespace wyspaBotWebApp.Services.Markov {
 
         private StringMarkov stringMarkov;
 
-        public MarkovService(string markovSourceFilePath) {
+        private int level;
+
+        public MarkovService(string markovSourceFilePath, int level) {
             this.markovSourceFilePath = markovSourceFilePath;
-        }
-
-        public void Initialize(int level = 2) {
-            this.logger.Debug($"Initializing string markov. Level: {level}");
-            this.stringMarkov = new StringMarkov(level);
-
-            this.LearnInitialData();
+            this.Initialize(level);
         }
 
         public void Learn(string sentence) {
@@ -62,6 +58,13 @@ namespace wyspaBotWebApp.Services.Markov {
                 }
                 throw e;
             }
+        }
+
+        private void Initialize(int markovLevel = 2) {
+            this.logger.Debug($"Initializing string markov. Level: {markovLevel}");
+            this.stringMarkov = new StringMarkov(markovLevel);
+
+            this.LearnInitialData();
         }
 
         private void LearnInitialData() {

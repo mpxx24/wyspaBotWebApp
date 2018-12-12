@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using NLog;
+using wyspaBotWebApp.Common;
 using wyspaBotWebApp.Core;
 using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.Youtube;
@@ -17,7 +18,7 @@ namespace wyspaBotWebApp.Services {
         private StreamReader reader;
         private readonly string messageAlias = "PRIVMSG";
         private readonly int port = 6667;
-        private readonly List<string> postedMessages = new List<string>();
+        private readonly ListWithSpecifiedSize<string> postedMessages = new ListWithSpecifiedSize<string>(200);
         private readonly List<string> chatUsers = new List<string>();
         private readonly List<string> textFaces = new List<string> {"( ͡° ͜ʖ ͡°)", "(ง ͠° ͟ل͜ ͡°)ง", "(ง'̀-'́)ง", "☜(ﾟヮﾟ☜)", "~(˘▾˘~)", "༼ つ  ͡° ͜ʖ ͡° ༽つ", "(ง°ل͜°)ง"};
         private readonly string throwingTableString = ":(╯°□°）╯︵┻━┻";
@@ -44,6 +45,7 @@ namespace wyspaBotWebApp.Services {
             try {
                 this.logger.Debug($"Starting {this.botName} - connecting to: {this.server}:{this.port}");
                 this.irc = new TcpClient(this.server, this.port);
+
                 var stream = this.irc.GetStream();
                 this.reader = new StreamReader(stream);
                 this.writer = new StreamWriter(stream);
@@ -51,8 +53,6 @@ namespace wyspaBotWebApp.Services {
                 this.writer.Flush();
                 this.writer.WriteLine(this.user);
                 this.writer.Flush();
-
-                this.markovService.Initialize(2);
 
                 this.ReadChat();
             }
@@ -140,13 +140,23 @@ namespace wyspaBotWebApp.Services {
                         }
 
                         if (splitInput.Count >= 3 && splitInput[1] == this.messageAlias && splitInput[2] == this.botName) {
-                            var nick = this.GetUserNick(splitInput);
-                            this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
+                            //TODO: fix
+                            try {
+                                var nick = this.GetUserNick(splitInput);
+                                this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
+                            }
+                            catch (Exception e) {
+                                
+                            }
+                        }
+
+                        if (phrase == "End of /NAMES list.") {
                             this.shouldStartSavingMessages = true;
                         }
 
-                        if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.Contains(this.botName)) {
-                            //this.postedMessages.Add(phrase);
+                        if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.StartsWith(this.botName)) {
+                            var nick = this.GetUserNick(splitInput);
+                            this.postedMessages.Add($"<{nick}> {phrase}");
                             this.markovService.Learn(phrase);
                         }
 
@@ -198,20 +208,9 @@ namespace wyspaBotWebApp.Services {
                                 //case "wcy":
                                 //    this.WyspaBotSay(CommandType.YesterdaysWorldCupGamesAndScoresCommand);
                                 //    break;
-                                //case "-pbin":
-                                //    if (splitInput.Count >= 6) {
-                                //        var numberOfMessagesToSave = splitInput[5];
-                                //        var isNumber = int.TryParse(numberOfMessagesToSave, out var limit);
-
-                                //        if (isNumber) {
-                                //            var messages = postedMessages.Skip(Math.Max(0, postedMessages.Count - limit));
-                                //            this.WyspaBotSay(CommandType.PasteToPastebinCommand, messages);
-                                //        }
-                                //        else {
-                                //            this.WyspaBotSay(CommandType.LogErrorCommand, $"Provided parameter <${nameof(limit)}> is not a number");
-                                //        }
-                                //    }
-                                //    break;
+                                case "history":
+                                    this.WyspaBotSay(CommandType.PasteToPastebinCommand, this.postedMessages);
+                                    break;
                                 case "-cltmp":
                                     this.postedMessages.Clear();
                                     break;
