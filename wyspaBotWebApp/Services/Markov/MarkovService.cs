@@ -12,11 +12,12 @@ namespace wyspaBotWebApp.Services.Markov {
 
         private StringMarkov stringMarkov;
 
-        private int level;
+        private readonly int level;
 
         public MarkovService(string markovSourceFilePath, int level) {
             this.markovSourceFilePath = markovSourceFilePath;
-            this.Initialize(level);
+            this.level = level;
+            this.Initialize(this.level);
         }
 
         public void Learn(string sentence) {

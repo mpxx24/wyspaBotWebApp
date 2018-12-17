@@ -34,7 +34,7 @@ namespace wyspaBotWebApp.Core {
                 "   nextevent -> list next event (closest in time)",
                 "   npod -> NASA's picture of the day",
                 "   hello -> hello everyone!",
-                "   asqq <question> -> ask bot a question (ENG)",
+                "   askq <question> -> ask bot a question (ENG)",
                 "",
                 "Throwing tables is not allowed!"
             };
@@ -62,20 +62,18 @@ namespace wyspaBotWebApp.Core {
 
     public class TodaysWorldCupGamesCommand : ICommand {
         public IEnumerable<string> GetText() {
-            var worldCupData = IoC.Resolve<IWorldCupService>().GetData("http://worldcup.sfg.io/matches");
-
-            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+            var worldCupData = IoC.Resolve<IWorldCupService>().GetData();
 
             return worldCupData
                 .Where(x => x.Datetime.Date == DateTime.Today)
                 .OrderBy(x => x.Datetime)
-                .Select(y => $"{y.HomeTeam.Country} - {y.AwayTeam.Country} ({TimeZoneInfo.ConvertTimeFromUtc(y.Datetime.DateTime, timeZoneInfo)})");
+                .Select(y => $"{y.HomeTeam.Country} - {y.AwayTeam.Country} ({TimeZoneInfo.ConvertTimeFromUtc(y.Datetime.DateTime, ApplicationSettingsHelper.TimeZoneInfo)})");
         }
     }
 
     public class YesterdaysWorldCupGamesAndScoresCommand : ICommand {
         public IEnumerable<string> GetText() {
-            var worldCupData = IoC.Resolve<IWorldCupService>().GetData("http://worldcup.sfg.io/matches");
+            var worldCupData = IoC.Resolve<IWorldCupService>().GetData();
 
             return worldCupData
                 .Where(x => x.Datetime.Date == DateTime.Today.AddDays(-1))

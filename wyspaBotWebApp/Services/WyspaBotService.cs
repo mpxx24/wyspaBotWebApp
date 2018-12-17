@@ -27,6 +27,7 @@ namespace wyspaBotWebApp.Services {
         private readonly string server = "irc.freenode.net";
         private readonly List<string> lastInnerException = new List<string>();
         private bool shouldStartSavingMessages;
+        private string endOfNamesListString = "End of /NAMES list.";
 
         private readonly string botName;
         private readonly string channel;
@@ -140,21 +141,15 @@ namespace wyspaBotWebApp.Services {
                         }
 
                         if (splitInput.Count >= 3 && splitInput[1] == this.messageAlias && splitInput[2] == this.botName) {
-                            //TODO: fix
-                            try {
-                                var nick = this.GetUserNick(splitInput);
-                                this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
-                            }
-                            catch (Exception e) {
-                                
-                            }
+                            var nick = this.GetUserNick(splitInput);
+                            this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
                         }
 
-                        if (phrase == "End of /NAMES list.") {
+                        if (phrase == this.endOfNamesListString) {
                             this.shouldStartSavingMessages = true;
                         }
 
-                        if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.StartsWith(this.botName)) {
+                        if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.StartsWith(this.botName) && phrase != this.endOfNamesListString) {
                             var nick = this.GetUserNick(splitInput);
                             this.postedMessages.Add($"<{nick}> {phrase}");
                             this.markovService.Learn(phrase);

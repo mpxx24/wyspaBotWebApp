@@ -2,6 +2,6 @@
 
 namespace wyspaBotWebApp.Services.WorldCup {
     public interface IWorldCupService {
-        IEnumerable<WorldCupApiData> GetData(string address);
+        IEnumerable<WorldCupApiData> GetData();
     }
 }
