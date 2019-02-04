@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MarkovSharp.TokenisationStrategies;
@@ -25,7 +26,12 @@ namespace wyspaBotWebApp.Services.Markov {
         }
 
         public string GetText() {
-            return this.stringMarkov.Walk().First();
+            var buffer = new List<string>();
+            for (var i = 0; i < 20; i++) {
+                buffer.Add(this.stringMarkov.Walk().First());
+            }
+
+            return buffer.OrderByDescending(x => x.Length).FirstOrDefault();
         }
 
         public void PersistMarkovObject() {

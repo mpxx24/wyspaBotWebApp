@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using SpotifyApiWrapper.API.Wrappers;
 using wyspaBotWebApp.Dtos;
@@ -133,6 +134,15 @@ namespace wyspaBotWebApp.Core {
         }
     }
 
+    public class ResetAllEventsCommand : ICommand {
+        public IEnumerable<string> GetText() {
+            IoC.Resolve<ICalendarService>().RemoveAllEvents();
+            return new List<string> {
+                "Done!"
+            };
+        }
+    }
+
     public class IntroduceYourselfCommand : ICommandWithStringParameter {
         public IEnumerable<string> GetText(string parameter) {
             return new List<string> {
@@ -235,7 +245,7 @@ namespace wyspaBotWebApp.Core {
             }
 
             var when = new DateTime();
-            if (!DateTime.TryParse(p[3], out when)) {
+            if (!DateTime.TryParseExact(p[3], "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out when)) {
                 if (int.TryParse(p[3], out var numberOfDaysFromNow)) {
                     when = DateTime.Now.AddDays(numberOfDaysFromNow);
                 }

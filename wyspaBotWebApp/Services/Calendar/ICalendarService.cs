@@ -8,5 +8,6 @@ namespace wyspaBotWebApp.Services.Calendar {
         IEnumerable<CalendarEventDto> GetAllEntries();
 
         CalendarEventDto GetNextEntry();
+        void RemoveAllEvents();
     }
 }

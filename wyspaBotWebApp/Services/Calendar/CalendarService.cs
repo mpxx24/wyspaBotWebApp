@@ -80,5 +80,15 @@ namespace wyspaBotWebApp.Services.Calendar {
                 throw e;
             }
         }
+
+        public void RemoveAllEvents() {
+            try {
+                this.repository.DeleteAll();
+            }
+            catch (Exception e) {
+                this.logger.Debug($"Failed to remove events! {e}");
+                throw e;
+            }
+        }
     }
 }

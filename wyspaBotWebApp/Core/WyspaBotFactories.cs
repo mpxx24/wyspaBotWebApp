@@ -30,6 +30,8 @@ namespace wyspaBotWebApp.Core {
                     return new ListAllEventsCommand();
                 case CommandType.NasaPictureOfTheDayCommand:
                     return new NasaPictureOfTheDayCommand();
+                case CommandType.ResetAllEventsCommand:
+                    return new ResetAllEventsCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }

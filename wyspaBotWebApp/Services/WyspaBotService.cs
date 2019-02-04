@@ -151,8 +151,11 @@ namespace wyspaBotWebApp.Services {
 
                         if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.StartsWith(this.botName) && phrase != this.endOfNamesListString) {
                             var nick = this.GetUserNick(splitInput);
-                            this.postedMessages.Add($"<{nick}> {phrase}");
-                            this.markovService.Learn(phrase);
+
+                            if (!string.IsNullOrEmpty(nick)) {
+                                this.postedMessages.Add($"<{nick}> {phrase}");
+                                this.markovService.Learn(phrase);
+                            }
                         }
 
                         if (splitInput.Count >= 4 && this.youtubeService.IsYoutubeVideoLink(phrase)) {
@@ -280,12 +283,19 @@ namespace wyspaBotWebApp.Services {
                                     this.WyspaBotDebug(this.lastInnerException);
                                     break;
                                 case "hello":
+                                case "elo":
+                                case "hi":
+                                case "yo":
+                                case "siema":
                                     var userNick = this.GetUserNick(splitInput);
                                     this.WyspaBotSay(CommandType.SayHelloToAllInTheChat, this.chatUsers.Where(x => !x.StartsWith("@") && x != userNick));
                                     break;
                                 case "askq":
                                     var question = this.GetPhraseWithoutCommandAndBotName(phrase, "askq");
                                     this.WyspaBotSay(CommandType.WolframAlphaShortQuestionCommand, question);
+                                    break;
+                                case "-rmevents":
+                                    this.WyspaBotSay(CommandType.ResetAllEventsCommand);
                                     break;
                                 default:
                                     if (splitInput.Any(x => x.Contains(this.botName))) {
@@ -306,7 +316,9 @@ namespace wyspaBotWebApp.Services {
 
         private string GetUserNick(IReadOnlyList<string> splitInput) {
             var indexOfExclamationMark = splitInput[0].IndexOf('!');
-            return splitInput[0].Substring(1, indexOfExclamationMark - 1);
+            return indexOfExclamationMark == -1
+                ? string.Empty
+                : splitInput[0].Substring(1, indexOfExclamationMark - 1);
         }
 
         public void SendData(string cmd, string param = "") {
