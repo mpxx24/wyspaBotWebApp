@@ -13,7 +13,7 @@ namespace wyspaBotWebApp.Services.PasteBin {
             this.requestsService = requestsService;
         }
 
-        public string Save(IEnumerable<string> messages) {
+        public string Save(IEnumerable<string> messages, string name = "history") {
             var sb = new StringBuilder();
 
             foreach (var message in messages) {
@@ -23,8 +23,32 @@ namespace wyspaBotWebApp.Services.PasteBin {
             var parameters = new NameValueCollection {
                 {"api_dev_key", this.pastebinApiDevKey},
                 {"api_option", "paste"},
-                {"api_paste_name", "history"},
+                {"api_paste_name", name},
                 {"api_paste_code", sb.ToString()}
+            };
+
+            var url = this.requestsService.PostData(this.loginUrl, parameters);
+            return url;
+        }
+
+        public string Save(StringBuilder stringBuilder, string name = "history") {
+            var parameters = new NameValueCollection {
+                {"api_dev_key", this.pastebinApiDevKey},
+                {"api_option", "paste"},
+                {"api_paste_name", name},
+                {"api_paste_code", stringBuilder.ToString()}
+            };
+
+            var url = this.requestsService.PostData(this.loginUrl, parameters);
+            return url;
+        }
+
+        public string Save(string message, string name = "history") {
+            var parameters = new NameValueCollection {
+                {"api_dev_key", this.pastebinApiDevKey},
+                {"api_option", "paste"},
+                {"api_paste_name", name},
+                {"api_paste_code", message}
             };
 
             var url = this.requestsService.PostData(this.loginUrl, parameters);

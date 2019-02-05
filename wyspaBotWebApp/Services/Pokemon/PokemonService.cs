@@ -9,20 +9,20 @@ using wyspaBotWebApp.Services.Pokemon.Dtos;
 
 namespace wyspaBotWebApp.Services.Pokemon {
     public class PokemonService : IPokemonService {
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
+        private readonly IPasteBinApiService pasteBinApiService;
         private readonly IRepository<PokeBattleResult> pokeBattleRepository;
 
         private readonly IPokemonApiService pokemonApiService;
 
-        private ILogger logger = LogManager.GetCurrentClassLogger();
-
-        public PokemonService(IPokemonApiService pokemonApiService, IRepository<PokeBattleResult> pokeBattleRepository) {
+        public PokemonService(IPokemonApiService pokemonApiService, IRepository<PokeBattleResult> pokeBattleRepository, IPasteBinApiService pasteBinApiService) {
             this.pokemonApiService = pokemonApiService;
             this.pokeBattleRepository = pokeBattleRepository;
+            this.pasteBinApiService = pasteBinApiService;
         }
 
         public IEnumerable<string> PerformBattle(string challengerName, string opponentName) {
             try {
-
                 if (challengerName == opponentName) {
                     return new List<string> {"You can't fight yourself..."};
                 }
@@ -112,14 +112,13 @@ namespace wyspaBotWebApp.Services.Pokemon {
             var results = this.GetPokeBattleStatsBasedOnRecords(allBattles);
 
             return new List<string> {
-                "POKEBATTLE STATS v1:",
-                " ",
+                "POKEBATTLE STATS",
                 $"MOST WINS PER PLAYER: ({results.PlayersWithTheMostWins.FirstPlace.Value}) {results.PlayersWithTheMostWins.FirstPlace.Name}, ({results.PlayersWithTheMostWins.SecondPlace.Value}) {results.PlayersWithTheMostWins.SecondPlace.Name}, ({results.PlayersWithTheMostWins.ThirdPlace.Value}) {results.PlayersWithTheMostWins.ThirdPlace.Name}",
                 $"MOST WINS PER POKEMON: ({results.PokemonsWithTheMostWins.FirstPlace.Value}) {results.PokemonsWithTheMostWins.FirstPlace.Name}, ({results.PokemonsWithTheMostWins.SecondPlace.Value}) {results.PokemonsWithTheMostWins.SecondPlace.Name}, ({results.PokemonsWithTheMostWins.ThirdPlace.Value}) {results.PokemonsWithTheMostWins.ThirdPlace.Name}",
                 $"MOST GAMES TOTAL PER PLAYER: ({results.PlayersWithThewMostGames.FirstPlace.Value}) {results.PlayersWithThewMostGames.FirstPlace.Name}, ({results.PlayersWithThewMostGames.SecondPlace.Value}) {results.PlayersWithThewMostGames.SecondPlace.Name}, ({results.PlayersWithThewMostGames.ThirdPlace.Value}) {results.PlayersWithThewMostGames.ThirdPlace.Name}",
                 $"MOST GAMES STARTED PER PLAYER: ({results.PlayersThatStartedTheMostGames.FirstPlace.Value}) {results.PlayersThatStartedTheMostGames.FirstPlace.Name}, ({results.PlayersThatStartedTheMostGames.SecondPlace.Value}) {results.PlayersThatStartedTheMostGames.SecondPlace.Name}, ({results.PlayersThatStartedTheMostGames.ThirdPlace.Value}) {results.PlayersThatStartedTheMostGames.ThirdPlace.Name}",
                 $"MOST BELOVED OPPENENT PER PLAYER: ({results.PlayersThatWereChallengedMostOften.FirstPlace.Value}) {results.PlayersThatWereChallengedMostOften.FirstPlace.Name}, ({results.PlayersThatWereChallengedMostOften.SecondPlace.Value}) {results.PlayersThatWereChallengedMostOften.SecondPlace.Name}, ({results.PlayersThatWereChallengedMostOften.ThirdPlace.Value}) {results.PlayersThatWereChallengedMostOften.ThirdPlace.Name}",
-                " "
+                $"FULL STATS: {results.LinkToFullStats}"
             };
         }
 
@@ -166,8 +165,8 @@ namespace wyspaBotWebApp.Services.Pokemon {
                                                                          .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.numberOfWins, pokeBattleResult.name))
                                                                          .ToList();
 
-            //need to copy by value...
-            var totalNumberOfGamesPerPLayer = new List<PokeBattleStringNumberObject>(numberOfGamesStartedPerPlayer);
+            //need to copy by value... (now for real tho)
+            var totalNumberOfGamesPerPLayer = numberOfGamesStartedPerPlayer.ConvertAll(x => new PokeBattleStringNumberObject(x.Value, x.Name));
             foreach (var ch in numberOfGamesBeingChallengedPerPlayer) {
                 if (totalNumberOfGamesPerPLayer.Any(x => x.Name == ch.Name)) {
                     totalNumberOfGamesPerPLayer.First(y => ch.Name != null && y.Name == ch.Name).Value += ch.Value;
@@ -178,15 +177,55 @@ namespace wyspaBotWebApp.Services.Pokemon {
             }
             totalNumberOfGamesPerPLayer = totalNumberOfGamesPerPLayer.OrderByDescending(x => x.Value).ToList();
 
+            var linkToTheFullStats = this.GetLinkForFullStats(numberOfGamesWonPerPlayer, numberOfGamesWonPerPokemon, numberOfGamesStartedPerPlayer, numberOfGamesBeingChallengedPerPlayer, totalNumberOfGamesPerPLayer);
+
             var stats = new PokeBattleStatsDto {
                 PlayersWithTheMostWins = this.GetStandingFromList(numberOfGamesWonPerPlayer),
                 PlayersThatStartedTheMostGames = this.GetStandingFromList(numberOfGamesStartedPerPlayer),
                 PlayersThatWereChallengedMostOften = this.GetStandingFromList(numberOfGamesBeingChallengedPerPlayer),
                 PlayersWithThewMostGames = this.GetStandingFromList(totalNumberOfGamesPerPLayer),
-                PokemonsWithTheMostWins = this.GetStandingFromList(numberOfGamesWonPerPokemon)
+                PokemonsWithTheMostWins = this.GetStandingFromList(numberOfGamesWonPerPokemon),
+                LinkToFullStats = linkToTheFullStats
             };
 
             return stats;
+        }
+
+        private string GetLinkForFullStats(IList<PokeBattleStringNumberObject> numberOfGamesWonPerPlayer, IList<PokeBattleStringNumberObject> numberOfGamesWonPerPokemon, IList<PokeBattleStringNumberObject> numberOfGamesStartedPerPlayer, IList<PokeBattleStringNumberObject> numberOfGamesBeingChallengedPerPlayer, IList<PokeBattleStringNumberObject> totalNumberOfGamesPerPlayer) {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("MOST WINS PER PLAYER");
+            foreach (var wonPerPlayer in numberOfGamesWonPerPlayer) {
+                sb.Append($"({wonPerPlayer.Value}) {wonPerPlayer.Name}, ");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("MOST WINS PER POKEMON");
+            foreach (var wonPerPok in numberOfGamesWonPerPokemon) {
+                sb.Append($"({wonPerPok.Value}) {wonPerPok.Name}, ");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("MOST GAMES TOTAL PER PLAYER");
+            foreach (var totalPerPlayer in totalNumberOfGamesPerPlayer) {
+                sb.Append($"({totalPerPlayer.Value}) {totalPerPlayer.Name}, ");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("MOST GAMES STARTED PER PLAYER");
+            foreach (var startedPerPlayer in numberOfGamesStartedPerPlayer) {
+                sb.Append($"({startedPerPlayer.Value}) {startedPerPlayer.Name}, ");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("MOST BELOVED OPPENENT PER PLAYER");
+            foreach (var challengedPerPlayer in numberOfGamesBeingChallengedPerPlayer) {
+                sb.Append($"({challengedPerPlayer.Value}) {challengedPerPlayer.Name}, ");
+            }
+            sb.AppendLine();
+
+            var link = this.pasteBinApiService.Save(sb, "poke battle stats!");
+            return link;
         }
 
         private PokeBattleStandingsDto GetStandingFromList(IList<PokeBattleStringNumberObject> list) {

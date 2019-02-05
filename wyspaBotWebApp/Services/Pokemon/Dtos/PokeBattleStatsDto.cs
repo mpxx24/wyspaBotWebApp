@@ -5,5 +5,6 @@
         public PokeBattleStandingsDto PlayersWithThewMostGames { get; set; }
         public PokeBattleStandingsDto PlayersThatStartedTheMostGames { get; set; }
         public PokeBattleStandingsDto PlayersThatWereChallengedMostOften { get; set; }
+        public string LinkToFullStats { get; set; }
     }
 }
