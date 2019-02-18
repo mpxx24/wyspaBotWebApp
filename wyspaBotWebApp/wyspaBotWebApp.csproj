@@ -265,6 +265,11 @@
     <Compile Include="Core\WyspaBotCommands.cs" />
     <Compile Include="Core\WyspaBotFactories.cs" />
     <Compile Include="Services\IWyspaBotService.cs" />
+    <Compile Include="Services\TasksManager\IHourlyTask.cs" />
+    <Compile Include="Services\TasksManager\ITask.cs" />
+    <Compile Include="Services\TasksManager\ITaskService.cs" />
+    <Compile Include="Services\TasksManager\TaskService.cs" />
+    <Compile Include="Services\TasksManager\Tasks\MarkovPersistingTask.cs" />
     <Compile Include="Services\WolframAlpha\IWolframAlphaService.cs" />
     <Compile Include="Services\WolframAlpha\WolframAlphaService.cs" />
     <Compile Include="Services\WorldCup\IWorldCupService.cs" />

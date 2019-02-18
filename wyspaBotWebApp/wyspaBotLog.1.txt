@@ -1,0 +1,12 @@
+2019-01-03 21:22:19.4256|DEBUG|wyspaBotWebApp.MvcApplication|Application start!
+2019-01-03 21:22:28.9821|DEBUG|wyspaBotWebApp.Services.Markov.MarkovService|Initializing string markov. Level: 2
+2019-01-03 21:22:29.0131|DEBUG|wyspaBotWebApp.Services.Markov.MarkovService|Passing initial data for markov model to learn. 'd:\home\site\wwwroot\initial source.txt'
+2019-01-03 21:22:29.0641|DEBUG|wyspaBotWebApp.Services.Markov.MarkovService|Initial source contains 5 items!
+2019-01-03 21:22:29.0810|DEBUG|wyspaBotWebApp.Services.WyspaBotService|Starting wyspaBot - connecting to: irc.freenode.net:6667
+2019-01-03 21:22:29.3173|DEBUG|wyspaBotWebApp.Services.WyspaBotService|Starting to read the chat! Channel #wyspaWT
+2019-01-09 18:47:44.5437|DEBUG|wyspaBotWebApp.MvcApplication|Application start!
+2019-01-09 18:47:57.8524|DEBUG|wyspaBotWebApp.Services.Markov.MarkovService|Initializing string markov. Level: 2
+2019-01-09 18:47:57.8824|DEBUG|wyspaBotWebApp.Services.Markov.MarkovService|Passing initial data for markov model to learn. 'd:\home\site\wwwroot\initial source.txt'
+2019-01-09 18:47:57.8937|DEBUG|wyspaBotWebApp.Services.Markov.MarkovService|Initial source contains 5 items!
+2019-01-09 18:47:57.9107|DEBUG|wyspaBotWebApp.Services.WyspaBotService|Starting wyspaBot - connecting to: irc.freenode.net:6667
+2019-01-09 18:47:58.0806|DEBUG|wyspaBotWebApp.Services.WyspaBotService|Starting to read the chat! Channel #wyspaWT

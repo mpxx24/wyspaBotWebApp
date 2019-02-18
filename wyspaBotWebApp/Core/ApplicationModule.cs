@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autofac;
 using Autofac.Core;
 using Autofac.Integration.Mvc;
@@ -10,6 +11,9 @@ using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.PasteBin;
 using wyspaBotWebApp.Services.Pokemon;
+using wyspaBotWebApp.Services.Tasks;
+using wyspaBotWebApp.Services.TasksManager;
+using wyspaBotWebApp.Services.TasksManager.Tasks;
 using wyspaBotWebApp.Services.WolframAlpha;
 using wyspaBotWebApp.Services.WorldCup;
 using wyspaBotWebApp.Services.Youtube;
@@ -66,6 +70,11 @@ namespace wyspaBotWebApp.Core {
 
             builder.RegisterType<PasteBinApiService>().As<IPasteBinApiService>()
                    .WithParameter(new NamedParameter("pastebinApiDevKey", this.pastebinApiDevKey));
+
+            builder.RegisterType<TaskService>().As<ITaskService>()
+                   .SingleInstance();
+
+            builder.RegisterType<MarkovPersistingTask>().As<ITask>();
 
             builder.RegisterControllers(typeof(MvcApplication).Assembly).InstancePerRequest();
             builder.RegisterModule<AutofacWebTypesModule>();

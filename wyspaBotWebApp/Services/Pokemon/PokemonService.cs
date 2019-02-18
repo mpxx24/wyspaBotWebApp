@@ -27,7 +27,6 @@ namespace wyspaBotWebApp.Services.Pokemon {
                     return new List<string> {"You can't fight yourself..."};
                 }
 
-                var fullBattle = new List<string> {$"{challengerName} and {opponentName} - it's time to d-d-d-d-d-duel!"};
                 var pokeBattleRecord = new PokeBattleResult();
 
                 var pokemonOfFirstPLayer = this.GetRandomPokemonForPlayer();
@@ -39,8 +38,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
                     }
                 }
 
-                fullBattle.Add($"{challengerName}'s pokemon is {pokemonOfFirstPLayer.name}! - {opponentName}'s pokemon is {pokemonOfSecondPlayer.name}!");
-                fullBattle.Add("FIGHT!");
+                var fullBattle = new List<string> {$"{challengerName}'s {pokemonOfFirstPLayer.name} vs. {opponentName}'s {pokemonOfSecondPlayer.name}! FIGHT!"};
 
                 var rand = new Random();
 

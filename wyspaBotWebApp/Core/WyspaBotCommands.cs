@@ -222,7 +222,7 @@ namespace wyspaBotWebApp.Core {
         public IEnumerable<string> GetText(IEnumerable<string> nicks) {
             var listOfNicks = nicks as IList<string> ?? nicks.ToList();
 
-            return listOfNicks.Select(nick => $"Hello {nick} :)").ToList();
+            return new List<string>{$"Hello {string.Join(" ", listOfNicks)} :)"};
         }
     }
 

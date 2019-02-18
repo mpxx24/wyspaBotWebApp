@@ -8,6 +8,7 @@ using NLog;
 using wyspaBotWebApp.Common;
 using wyspaBotWebApp.Core;
 using wyspaBotWebApp.Services.Markov;
+using wyspaBotWebApp.Services.Tasks;
 using wyspaBotWebApp.Services.Youtube;
 
 namespace wyspaBotWebApp.Services {
@@ -33,12 +34,14 @@ namespace wyspaBotWebApp.Services {
         private readonly string channel;
         private readonly IMarkovService markovService;
         private readonly IYoutubeService youtubeService;
+        private readonly ITaskService taskService;
 
-        public WyspaBotService(string channel, string botName, IMarkovService markovService, IYoutubeService youtubeService) {
+        public WyspaBotService(string channel, string botName, IMarkovService markovService, IYoutubeService youtubeService, ITaskService taskService) {
             this.channel = channel;
             this.botName = botName;
             this.markovService = markovService;
             this.youtubeService = youtubeService;
+            this.taskService = taskService;
             this.user = $"USER {this.botName} 0 * :{this.botName}";
         }
 
@@ -55,6 +58,7 @@ namespace wyspaBotWebApp.Services {
                 this.writer.WriteLine(this.user);
                 this.writer.Flush();
 
+                this.taskService.WatchForTasks();
                 this.ReadChat();
             }
             catch (Exception e) {
