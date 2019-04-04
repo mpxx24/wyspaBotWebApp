@@ -27,9 +27,16 @@ namespace wyspaBotWebApp.Services.Markov {
 
         public string GetText() {
             var buffer = new List<string>();
-            for (var i = 0; i < 20; i++) {
-                buffer.Add(this.stringMarkov.Walk().First());
-            }
+            while (!buffer.Any())
+            {
+                for (var i = 0; i < 20; i++)
+                {
+                    buffer.Add(this.stringMarkov.Walk().First());
+                }
+
+                //temp solution to not-wanted strings
+                buffer.RemoveAll(x => x.Contains("@gateway") || x.Contains("@freenode") || x.Contains("https://") || x.Contains("http://") || x.Contains(":Ping timeout:"));
+            };
 
             return buffer.OrderByDescending(x => x.Length).FirstOrDefault();
         }
