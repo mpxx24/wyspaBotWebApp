@@ -74,6 +74,8 @@ namespace wyspaBotWebApp.Core {
                     return new AddNewEventCommand();
                 case CommandType.SayHelloToAllInTheChat:
                     return new SayHelloToAllInTheChatCommand();
+                case CommandType.GetMostUsedWordsCommand:
+                    return new GetMostUsedWordsCommand();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null);
             }

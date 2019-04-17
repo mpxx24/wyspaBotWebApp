@@ -74,6 +74,36 @@ namespace wyspaBotWebApp.Services.Markov {
             }
         }
 
+        public IEnumerable<string> GetMostUsedWords() {
+            var stats = new Dictionary<string, int>();
+            var result = new List<string>();
+
+            this.logger.Debug($"Getting saved data from file. '{this.markovSourceFilePath}'");
+
+            if (!File.Exists(this.markovSourceFilePath)) {
+                this.logger.Debug($"Failed to get data from file! File '{this.markovSourceFilePath}' doesn't exist");
+                return null;
+            }
+
+            var allData = File.ReadAllText(this.markovSourceFilePath).Split(' ').Where(x => x.Length > 3).ToList();
+
+            foreach (var word in allData) {
+                if (stats.ContainsKey(word)) {
+                    stats[word] = stats[word] + 1;
+                }
+                else {
+                    stats.Add(word, 1);
+                }
+            }
+
+            result.Add("Most used words:");
+            foreach (var stat in stats.OrderByDescending(x => x.Value)) {
+                result.Add($"({stat.Value}) {stat.Key}");    
+            }
+            
+            return new List<string>{$"Total number of words ({result.Count})", "Most used words:", $"{string.Join(", ", result.Take(5))}"};
+        }
+
         private void Initialize(int markovLevel = 2) {
             this.logger.Debug($"Initializing string markov. Level: {markovLevel}");
             this.stringMarkov = new StringMarkov(markovLevel);

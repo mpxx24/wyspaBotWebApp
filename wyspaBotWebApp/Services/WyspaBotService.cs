@@ -301,6 +301,10 @@ namespace wyspaBotWebApp.Services {
                                 case "-rmevents":
                                     this.WyspaBotSay(CommandType.ResetAllEventsCommand);
                                     break;
+                                case "muw":
+                                    var wordUseStats = this.markovService.GetMostUsedWords();
+                                    this.WyspaBotSay(CommandType.GetMostUsedWordsCommand, wordUseStats);
+                                    break;
                                 default:
                                     if (splitInput.Any(x => x.Contains(this.botName))) {
                                         this.WyspaBotSay(CommandType.ResponseWhenMentionedCommand);

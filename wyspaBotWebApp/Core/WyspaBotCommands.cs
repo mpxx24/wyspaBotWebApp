@@ -271,6 +271,11 @@ namespace wyspaBotWebApp.Core {
             return new List<string> {$"Hello {string.Join(" ", p)}"};
         }
     }
+    public class GetMostUsedWordsCommand : ICommandWithStringIenumerableParameter {
+        public IEnumerable<string> GetText(IEnumerable<string> parameters) {
+            return parameters;
+        }
+    }
 
     //TODO: refactor
     public class RecommendedTracksBasedOnTrackCommand : ICommandWithTwoParameters {

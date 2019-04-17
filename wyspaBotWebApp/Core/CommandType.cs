@@ -26,6 +26,7 @@
         SayHelloToAllInTheChat = 23,
         WolframAlphaShortQuestionCommand = 24,
         ResetAllEventsCommand = 25,
+        GetMostUsedWordsCommand = 26,
 
         LogErrorCommand = 999,
     }
