@@ -95,7 +95,7 @@ namespace wyspaBotWebApp.Services {
                             this.SendData(joinString);
                         }
 
-                        if (splitInput[0] == this.botName) {
+                        if (splitInput[1] == "NICK") {
                             var previousNick = this.GetUserNick(splitInput);
                             var newNick = splitInput[2].Substring(1, splitInput[2].Length - 1);
                             if (this.chatUsers.Any(x => x == previousNick)) {
@@ -117,6 +117,18 @@ namespace wyspaBotWebApp.Services {
 
                             for (var i = 0; i < numberOfPeopleInChat; i++) {
                                 this.chatUsers.Add(splitInput[6 + i]);
+                            }
+
+                            this.WyspaBotSay(CommandType.SayHelloAfterJoining, this.chatUsers);
+                        } else if (splitInput.Count >= 6 && splitInput[4].ToLowerInvariant() == this.channel.ToLowerInvariant() && splitInput[5].Contains(this.botName)) {
+                            this.chatUsers.Clear();
+                            var numberOfPeopleInChat = splitInput.Count - 6;
+
+                            for (var i = 0; i < numberOfPeopleInChat; i++) {
+                                var nick = splitInput[6 + i];
+                                if (!nick.StartsWith("@") && !nick.StartsWith(":")) {
+                                    this.chatUsers.Add(nick);
+                                }
                             }
 
                             this.WyspaBotSay(CommandType.SayHelloAfterJoining, this.chatUsers);
