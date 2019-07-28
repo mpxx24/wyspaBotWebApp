@@ -1,12 +1,16 @@
-﻿@{
+﻿@model wyspaBotWebApp.ViewModels.HomeViewModel
+
+@{
     ViewBag.Title = "Home Page";
 }
 
 
-<div class="row">
-    <div class="col-md-4">
+<div>
         @Html.ActionLink("START", "StartBot", "CustomActions")
         @Html.ActionLink("STOP", "StopBot", "CustomActions")
-        @Html.ActionLink("PERSIST MARKOV STATE", "PersistMarkovState", "CustomActions")
     </div>
+<div>
+    @if (!string.IsNullOrEmpty(Model.Logs)) {
+        @Html.TextAreaFor(x => x.Logs, new {rows = "40", cols = "200", style = "max-width: inherit"})
+    }
 </div>

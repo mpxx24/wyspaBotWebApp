@@ -96,12 +96,15 @@ namespace wyspaBotWebApp.Services.Markov {
                 }
             }
 
-            result.Add("Most used words:");
             foreach (var stat in stats.OrderByDescending(x => x.Value)) {
                 result.Add($"({stat.Value}) {stat.Key}");    
             }
             
-            return new List<string>{$"Total number of words ({result.Count})", "Most used words:", $"{string.Join(", ", result.Take(5))}"};
+            return new List<string>{$"Total number of words ({result.Count})", "Most used words:", $"{string.Join(", ", result.Take(15))}"};
+        }
+
+        public string GetPathToSourceFile() {
+            return this.markovSourceFilePath;
         }
 
         private void Initialize(int markovLevel = 2) {

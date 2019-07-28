@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web.Mvc;
 using Autofac;
 using Autofac.Integration.Mvc;
-using wyspaBotWebApp.Services.Tasks;
 
 namespace wyspaBotWebApp.Core {
     public static class IoC {
@@ -39,8 +38,8 @@ namespace wyspaBotWebApp.Core {
 
         public static IEnumerable<Type> GetAllImplementationsOfInterface(Type interfaceType) {
             var types = container.ComponentRegistry.Registrations
-                           .Where(r => interfaceType.IsAssignableFrom(r.Activator.LimitType))
-                           .Select(r => r.Activator.LimitType);
+                                 .Where(r => interfaceType.IsAssignableFrom(r.Activator.LimitType))
+                                 .Select(r => r.Activator.LimitType);
 
             return types;
         }

@@ -24,7 +24,9 @@ namespace wyspaBotWebApp.Services.PasteBin {
                 {"api_dev_key", this.pastebinApiDevKey},
                 {"api_option", "paste"},
                 {"api_paste_name", name},
-                {"api_paste_code", sb.ToString()}
+                {"api_paste_code", sb.ToString()},
+                {"api_paste_expire_date", "10M"},
+                {"api_paste_private", "1"}
             };
 
             var url = this.requestsService.PostData(this.loginUrl, parameters);
@@ -36,7 +38,9 @@ namespace wyspaBotWebApp.Services.PasteBin {
                 {"api_dev_key", this.pastebinApiDevKey},
                 {"api_option", "paste"},
                 {"api_paste_name", name},
-                {"api_paste_code", stringBuilder.ToString()}
+                {"api_paste_code", stringBuilder.ToString()},
+                {"api_paste_expire_date", "10M"},
+                {"api_paste_private", "1"}
             };
 
             var url = this.requestsService.PostData(this.loginUrl, parameters);
@@ -48,7 +52,9 @@ namespace wyspaBotWebApp.Services.PasteBin {
                 {"api_dev_key", this.pastebinApiDevKey},
                 {"api_option", "paste"},
                 {"api_paste_name", name},
-                {"api_paste_code", message}
+                {"api_paste_code", message},
+                {"api_paste_expire_date", "10M"},
+                {"api_paste_private", "1"}
             };
 
             var url = this.requestsService.PostData(this.loginUrl, parameters);

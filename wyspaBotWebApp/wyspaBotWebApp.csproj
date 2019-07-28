@@ -236,14 +236,20 @@
     <Compile Include="Services\Configuration\BotConfigurationService.cs" />
     <Compile Include="Services\Configuration\BotConfigurationServiceDecorator.cs" />
     <Compile Include="Services\Configuration\IBotConfigurationService.cs" />
+    <Compile Include="Services\Email\EmailService.cs" />
+    <Compile Include="Services\Email\IEmailService.cs" />
     <Compile Include="Services\GoogleMaps\GoogleMapsService.cs" />
     <Compile Include="Services\GoogleMaps\IGoogleMapsService.cs" />
+    <Compile Include="Services\Providers\Logs\ILogsProvider.cs" />
+    <Compile Include="Services\Providers\Logs\LogsProvider.cs" />
+    <Compile Include="Services\Providers\PersonalData\IPersonalDataProvider.cs" />
     <Compile Include="Services\Markov\IMarkovService.cs" />
     <Compile Include="Services\Markov\MarkovService.cs" />
     <Compile Include="Services\NasaApi\NasaApiPictureOfTheDayRootObject.cs" />
     <Compile Include="Services\NasaApi\INasaApiService.cs" />
     <Compile Include="Services\NasaApi\NasaApiService.cs" />
     <Compile Include="Services\PasteBin\IPasteBinApiService.cs" />
+    <Compile Include="Services\Providers\PersonalData\PersonalDataProvider.cs" />
     <Compile Include="Services\Pokemon\Dtos\PokeBattleStandingsDto.cs" />
     <Compile Include="Services\Pokemon\Dtos\PokeBattleStringNumberObject.cs" />
     <Compile Include="Services\Pokemon\IPokemonApiService.cs" />
@@ -268,7 +274,11 @@
     <Compile Include="Services\TasksManager\IHourlyTask.cs" />
     <Compile Include="Services\TasksManager\ITask.cs" />
     <Compile Include="Services\TasksManager\ITaskService.cs" />
+    <Compile Include="Services\TasksManager\IDailyTask.cs" />
+    <Compile Include="Services\TasksManager\IWeeklyTask.cs" />
     <Compile Include="Services\TasksManager\TaskService.cs" />
+    <Compile Include="Services\TasksManager\Tasks\DataBackupDailyTask.cs" />
+    <Compile Include="Services\TasksManager\Tasks\DataBackupWeeklyTask.cs" />
     <Compile Include="Services\TasksManager\Tasks\MarkovPersistingTask.cs" />
     <Compile Include="Services\WolframAlpha\IWolframAlphaService.cs" />
     <Compile Include="Services\WolframAlpha\WolframAlphaService.cs" />
@@ -279,6 +289,7 @@
     <Compile Include="Services\Youtube\IYoutubeService.cs" />
     <Compile Include="Services\Youtube\YoutubeApiRootObject.cs" />
     <Compile Include="Services\Youtube\YoutubeService.cs" />
+    <Compile Include="ViewModels\HomeViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-theme.css" />
@@ -303,6 +314,7 @@
     </None>
     <None Include="Properties\PublishProfiles\wyspabot - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\wyspabot - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\WyspaBot2 - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />

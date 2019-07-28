@@ -95,7 +95,7 @@ namespace wyspaBotWebApp.Services {
                             this.SendData(joinString);
                         }
 
-                        if (splitInput[1] == "NICK") {
+                        if (splitInput[0] == this.botName) {
                             var previousNick = this.GetUserNick(splitInput);
                             var newNick = splitInput[2].Substring(1, splitInput[2].Length - 1);
                             if (this.chatUsers.Any(x => x == previousNick)) {
@@ -156,7 +156,7 @@ namespace wyspaBotWebApp.Services {
                         if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.StartsWith(this.botName) && phrase != this.endOfNamesListString) {
                             var nick = this.GetUserNick(splitInput);
 
-                            if (!string.IsNullOrEmpty(nick)) {
+                            if (!string.IsNullOrEmpty(nick) && !nick.Contains('_')) {
                                 this.postedMessages.Add($"<{nick}> {phrase}");
                                 this.markovService.Learn(phrase);
                             }

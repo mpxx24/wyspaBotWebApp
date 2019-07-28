@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Autofac;
 using Autofac.Core;
 using Autofac.Integration.Mvc;
 using NHibernate;
 using wyspaBotWebApp.Services;
 using wyspaBotWebApp.Services.Calendar;
+using wyspaBotWebApp.Services.Email;
 using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.NasaApi;
 using wyspaBotWebApp.Services.PasteBin;
 using wyspaBotWebApp.Services.Pokemon;
+using wyspaBotWebApp.Services.Providers.Logs;
+using wyspaBotWebApp.Services.Providers.PersonalData;
 using wyspaBotWebApp.Services.Tasks;
 using wyspaBotWebApp.Services.TasksManager;
 using wyspaBotWebApp.Services.TasksManager.Tasks;
@@ -27,8 +29,10 @@ namespace wyspaBotWebApp.Core {
         private readonly string markovSourceFilePath;
         private readonly string youtubeApiKey;
         private readonly string wolframAlphaAppId;
+        private readonly string mailSenderAddress;
+        private readonly string mailSenderPassword;
 
-        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey, string markovSourceFilePath, string youtubeApiKey, string wolframAlphaAppId) {
+        public ApplicationModule(string pastebinApiDevKey, string channelName, string botName, string nasaApiKey, string markovSourceFilePath, string youtubeApiKey, string wolframAlphaAppId, string mailSenderAddress, string mailSenderPassword) {
             this.pastebinApiDevKey = pastebinApiDevKey;
             this.channelName = channelName;
             this.botName = botName;
@@ -36,6 +40,8 @@ namespace wyspaBotWebApp.Core {
             this.markovSourceFilePath = markovSourceFilePath;
             this.youtubeApiKey = youtubeApiKey;
             this.wolframAlphaAppId = wolframAlphaAppId;
+            this.mailSenderAddress = mailSenderAddress;
+            this.mailSenderPassword = mailSenderPassword;
         }
 
         protected override void Load(ContainerBuilder builder) {
@@ -71,10 +77,24 @@ namespace wyspaBotWebApp.Core {
             builder.RegisterType<PasteBinApiService>().As<IPasteBinApiService>()
                    .WithParameter(new NamedParameter("pastebinApiDevKey", this.pastebinApiDevKey));
 
+            builder.RegisterType<EmailService>().As<IEmailService>()
+                   .WithParameter(new NamedParameter("mailSenderAddress", this.mailSenderAddress))
+                   .WithParameter(new NamedParameter("mailSenderPassword", this.mailSenderPassword));
+
+            builder.RegisterType<PersonalDataProvider>().As<IPersonalDataProvider>();
+
+            builder.RegisterType<LogsProvider>().As<ILogsProvider>();
+
             builder.RegisterType<TaskService>().As<ITaskService>()
                    .SingleInstance();
 
             builder.RegisterType<MarkovPersistingTask>().As<ITask>();
+
+            //dayily backup
+            builder.RegisterType<DataBackupDailyTask>().As<ITask>();
+
+            //weekly backup
+            //builder.RegisterType<DataBackupWeeklyTask>().As<ITask>();
 
             builder.RegisterControllers(typeof(MvcApplication).Assembly).InstancePerRequest();
             builder.RegisterModule<AutofacWebTypesModule>();

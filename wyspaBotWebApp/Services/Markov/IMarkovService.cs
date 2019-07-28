@@ -9,5 +9,6 @@ namespace wyspaBotWebApp.Services.Markov {
         void PersistMarkovObject();
 
         IEnumerable<string> GetMostUsedWords();
+        string GetPathToSourceFile();
     }
 }

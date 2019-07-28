@@ -13,10 +13,7 @@ using wyspaBotWebApp.Models;
 namespace wyspaBotWebApp.Core {
     public class NhibernateHelper {
         private static ISessionFactory sessionFactory;
-
-        //TODO: YO, WHY WOULD YOU HARDCODE THE PATH TO THE DB FILE?
-        private static readonly string dbFilePath = "d:\\home\\site\\wwwroot\\dbFile.sqllite";
-
+        
         private static ISessionFactory SessionFactory => sessionFactory ?? (sessionFactory = CreateSessionFactory());
 
         public static ISession OpenSession() {
@@ -24,12 +21,12 @@ namespace wyspaBotWebApp.Core {
         }
 
         private static ISessionFactory CreateSessionFactory() {
-            if (!File.Exists(dbFilePath)) {
-                File.Create(dbFilePath);
+            if (!File.Exists(ApplicationSettingsHelper.PathToDbFile)) {
+                File.Create(ApplicationSettingsHelper.PathToDbFile);
             }
 
             return Fluently.Configure()
-                           .Database(SQLiteConfiguration.Standard.UsingFile(dbFilePath))
+                           .Database(SQLiteConfiguration.Standard.UsingFile(ApplicationSettingsHelper.PathToDbFile))
                            .Mappings(m => { m.FluentMappings.AddFromNamespaceOf<PokeBattleResult>(); })
                            .ExposeConfiguration(cfg => new SchemaUpdate(cfg).Execute(false, true))
                            .BuildSessionFactory();
