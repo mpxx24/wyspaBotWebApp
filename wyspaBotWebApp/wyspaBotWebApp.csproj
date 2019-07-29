@@ -220,6 +220,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Core\ApplicationModule.cs" />
     <Compile Include="Core\ApplicationSettingsHelper.cs" />
+    <Compile Include="Core\Command.cs" />
     <Compile Include="Core\IRepository.cs" />
     <Compile Include="Core\NhibernateHelper.cs" />
     <Compile Include="Core\Repository.cs" />

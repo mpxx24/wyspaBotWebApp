@@ -17,5 +17,13 @@ namespace wyspaBotWebApp.Services.Configuration {
 
             return commands.Select(x => new BotCommandPrivilegeDto {CommandId = x.CommandId, DisplayName = x.DisplayName, IsAvailable = x.IsAvailable});
         }
+
+        public void UpdatePrivilege(BotCommandPrivilegeDto dto) {
+            var itemToUpdate = this.botCommandPrivilegeRepository.Get(dto.CommandId);
+            itemToUpdate.DisplayName = dto.DisplayName;
+            itemToUpdate.IsAvailable = dto.IsAvailable;
+
+            this.botCommandPrivilegeRepository.Update(itemToUpdate);
+        }
     }
 }

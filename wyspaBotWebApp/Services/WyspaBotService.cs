@@ -193,6 +193,16 @@ namespace wyspaBotWebApp.Services {
                                 splitInput.Add(string.Empty);
                             }
 
+                            var commandText = splitInput[4].Trim().ToLowerInvariant();
+                            var commands = new List<Command>(); //get all commands
+
+                            var actualCommand = commands.FirstOrDefault(x => x.Aliases.Contains(commandText));
+                            var messages = actualCommand?.Code.Invoke(splitInput);
+
+                            foreach (var message in messages) {
+                                this.SendData($"{this.messageAlias} {this.channel} :{message}");
+                            }
+
                             switch (splitInput[4].Trim().ToLowerInvariant()) {
                                 case "":
                                     this.WyspaBotSay(CommandType.IntroduceYourselfCommand, this.botName);

@@ -1,39 +1,34 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using wyspaBotWebApp.Core;
 using wyspaBotWebApp.Dtos.Configuration;
-using wyspaBotWebApp.Models;
 
 namespace wyspaBotWebApp.Services.Configuration {
     public class BotConfigurationServiceDecorator : IBotConfigurationService {
-        private readonly Repository<BotCommandPrivilege> botCommandPrivilegeRepository;
-
         private readonly IBotConfigurationService decorated;
 
         private List<BotCommandPrivilegeDto> privilegesCache = new List<BotCommandPrivilegeDto>();
 
         private bool isCacheValid;
 
-        public BotConfigurationServiceDecorator(IBotConfigurationService decorated, Repository<BotCommandPrivilege> botCommandPrivilegeRepository) {
+        public BotConfigurationServiceDecorator(IBotConfigurationService decorated) {
             this.decorated = decorated;
-            this.botCommandPrivilegeRepository = botCommandPrivilegeRepository;
         }
 
         public IEnumerable<BotCommandPrivilegeDto> GetCommandsConfiguration() {
-            if (this.isCacheValid) {
-                return this.privilegesCache;
+            if (!this.isCacheValid) {
+                this.RefreshCacheIfNeeded();
             }
-            return this.decorated.GetCommandsConfiguration();
+
+            return this.privilegesCache;
+        }
+
+        public void UpdatePrivilege(BotCommandPrivilegeDto dto) {
+            this.decorated.UpdatePrivilege(dto);
+            this.isCacheValid = false;
         }
 
         private void RefreshCacheIfNeeded() {
-            var commandPrivileges = this.botCommandPrivilegeRepository.GetAll();
-            this.privilegesCache = commandPrivileges.Select(x => new BotCommandPrivilegeDto {
-                CommandId = x.CommandId,
-                DisplayName = x.DisplayName,
-                IsAvailable = x.IsAvailable
-            }).ToList();
-
+            this.privilegesCache = this.decorated.GetCommandsConfiguration().ToList();
             this.isCacheValid = true;
         }
     }
