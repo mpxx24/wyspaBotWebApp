@@ -7,6 +7,7 @@ using System.Threading;
 using NLog;
 using wyspaBotWebApp.Common;
 using wyspaBotWebApp.Core;
+using wyspaBotWebApp.Services.CommandsService;
 using wyspaBotWebApp.Services.Markov;
 using wyspaBotWebApp.Services.Tasks;
 using wyspaBotWebApp.Services.Youtube;
@@ -29,19 +30,22 @@ namespace wyspaBotWebApp.Services {
         private readonly List<string> lastInnerException = new List<string>();
         private bool shouldStartSavingMessages;
         private string endOfNamesListString = "End of /NAMES list.";
+        private IEnumerable<BaseCommand> commands = new List<BaseCommand>();
 
         private readonly string botName;
         private readonly string channel;
         private readonly IMarkovService markovService;
         private readonly IYoutubeService youtubeService;
         private readonly ITaskService taskService;
+        private readonly ICommandsService commandsService;
 
-        public WyspaBotService(string channel, string botName, IMarkovService markovService, IYoutubeService youtubeService, ITaskService taskService) {
+        public WyspaBotService(string channel, string botName, IMarkovService markovService, IYoutubeService youtubeService, ITaskService taskService, ICommandsService commandsService) {
             this.channel = channel;
             this.botName = botName;
             this.markovService = markovService;
             this.youtubeService = youtubeService;
             this.taskService = taskService;
+            this.commandsService = commandsService;
             this.user = $"USER {this.botName} 0 * :{this.botName}";
         }
 
@@ -59,6 +63,7 @@ namespace wyspaBotWebApp.Services {
                 this.writer.Flush();
 
                 this.taskService.WatchForTasks();
+                this.commands = this.commandsService.GetAllAvailableCommands();
                 this.ReadChat();
             }
             catch (Exception e) {
@@ -188,42 +193,28 @@ namespace wyspaBotWebApp.Services {
                             this.WyspaBotSay(CommandType.PutTheTableBackCommand);
                         }
 
+                        //BOT COMMANDS
                         if (splitInput.Count >= 4 && (splitInput[3] == $":{this.botName}" || splitInput[3] == $":{this.botName}:")) {
                             if (splitInput.Count == 4) {
                                 splitInput.Add(string.Empty);
                             }
 
                             var commandText = splitInput[4].Trim().ToLowerInvariant();
-                            var commands = new List<Command>(); //get all commands
 
                             var actualCommand = commands.FirstOrDefault(x => x.Aliases.Contains(commandText));
-                            var messages = actualCommand?.Code.Invoke(splitInput);
+                            if (actualCommand != null) {
+                                var messages = actualCommand.Code?.Invoke(splitInput, this.botName, this.postedMessages, this.chatUsers);
 
-                            foreach (var message in messages) {
-                                this.SendData($"{this.messageAlias} {this.channel} :{message}");
+                                foreach (var message in messages) {
+                                    this.SendData($"{this.messageAlias} {this.channel} :{message}");
+                                }
                             }
-
-                            switch (splitInput[4].Trim().ToLowerInvariant()) {
-                                case "":
-                                    this.WyspaBotSay(CommandType.IntroduceYourselfCommand, this.botName);
-                                    break;
-                                case "help":
-                                case "h":
-                                    this.WyspaBotSay(CommandType.HelpCommand);
-                                    break;
-                                case "rtracks":
-                                    if (splitInput.Count >= 6) {
-                                        var trackId = splitInput[5];
-                                        var limit = 10;
-
-                                        if (splitInput.Count >= 7) {
-                                            var limitAsString = splitInput[6];
-                                            int.TryParse(limitAsString, out limit);
-                                        }
-
-                                        this.WyspaBotSay(CommandType.RecommendedTracksBasedOnTrackCommand, trackId, limit);
-                                    }
-                                    break;
+                            else {
+                                if (splitInput.Any(x => x.Contains(this.botName))) {
+                                    this.WyspaBotSay(CommandType.ResponseWhenMentionedCommand);
+                                }
+                            }
+                            //switch (commandText) {
                                 //case "-wct":
                                 //case "wct":
                                 //    this.WyspaBotSay(CommandType.TodaysWorldCupGamesCommand);
@@ -232,107 +223,16 @@ namespace wyspaBotWebApp.Services {
                                 //case "wcy":
                                 //    this.WyspaBotSay(CommandType.YesterdaysWorldCupGamesAndScoresCommand);
                                 //    break;
-                                case "history":
-                                    this.WyspaBotSay(CommandType.PasteToPastebinCommand, this.postedMessages);
-                                    break;
-                                case "-cltmp":
-                                    this.postedMessages.Clear();
-                                    break;
-                                case "pokebattle":
-                                    if (splitInput.Count >= 6) {
-                                        var opponentName = splitInput[5];
-
-                                        if (!this.chatUsers.Contains(opponentName)) {
-                                            this.WyspaBotSay(CommandType.LogErrorCommand, $"User \"{opponentName}\" does not exist.");
-                                        }
-                                        else {
-                                            var nick = new List<string> {this.GetUserNick(splitInput), opponentName};
-
-                                            this.WyspaBotSay(CommandType.PokeBattleCommand, nick);
-                                        }
-                                    }
-                                    else {
-                                        this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify opponent's name!)");
-                                    }
-                                    break;
-                                case "ghrepo":
-                                    this.WyspaBotSay(CommandType.GetRepositoryAddressCommand);
-                                    break;
-                                case "pbstats":
-                                    this.WyspaBotSay(CommandType.PokeBattleStatsCommand);
-                                    break;
-                                case "clpbs":
-                                    this.WyspaBotSay(CommandType.ClearPokeBattleStatsCommand);
-                                    break;
-                                case "gmdistance":
-                                    if (splitInput.Count >= 7) {
-                                        var origin = splitInput[5];
-                                        var destination = splitInput[6];
-
-                                        this.WyspaBotSay(CommandType.GoogleMapDistanceCommand, new List<string> {origin, destination});
-                                    }
-                                    else {
-                                        this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: origin and destination!)");
-                                    }
-                                    break;
-                                case "markov":
-                                    var message = this.markovService.GetText();
-                                    this.WyspaBotDebug(new List<string> {message});
-                                    break;
-                                case "addevent":
-                                    if (splitInput.Count >= 7) {
-                                        var whoAdded = this.GetUserNick(splitInput);
-                                        var realPrhase = this.GetPhraseWithoutCommandAndBotName(phrase, "addevent");
-
-                                        var realArguments = realPrhase.Split('-').Select(x => x.Trim()).ToList();
-                                        if (realArguments.Count != 3) {
-                                            this.WyspaBotSay(CommandType.LogErrorCommand, "You need to pass exactly 3 parameters seperated by '-' sign!");
-                                            break;
-                                        }
-
-                                        this.WyspaBotSay(CommandType.AddEventCommand, new List<string> {whoAdded, realArguments[0], realArguments[1], realArguments[2]});
-                                    }
-                                    else {
-                                        this.WyspaBotSay(CommandType.LogErrorCommand, "You need to specify both: event name and time!)");
-                                    }
-                                    break;
-                                case "listevents":
-                                    this.WyspaBotSay(CommandType.ListAllEventsCommand);
-                                    break;
-                                case "nextevent":
-                                    this.WyspaBotSay(CommandType.GetNextEventCommand);
-                                    break;
-                                case "npod":
-                                    this.WyspaBotSay(CommandType.NasaPictureOfTheDayCommand);
-                                    break;
-                                case "-debug":
-                                    this.WyspaBotDebug(this.lastInnerException);
-                                    break;
-                                case "hello":
-                                case "elo":
-                                case "hi":
-                                case "yo":
-                                case "siema":
-                                    var userNick = this.GetUserNick(splitInput);
-                                    this.WyspaBotSay(CommandType.SayHelloToAllInTheChat, this.chatUsers.Where(x => !x.StartsWith("@") && x != userNick));
-                                    break;
-                                case "askq":
-                                    var question = this.GetPhraseWithoutCommandAndBotName(phrase, "askq");
-                                    this.WyspaBotSay(CommandType.WolframAlphaShortQuestionCommand, question);
-                                    break;
-                                case "-rmevents":
-                                    this.WyspaBotSay(CommandType.ResetAllEventsCommand);
-                                    break;
-                                case "muw":
-                                    var wordUseStats = this.markovService.GetMostUsedWords();
-                                    this.WyspaBotSay(CommandType.GetMostUsedWordsCommand, wordUseStats);
-                                    break;
-                                default:
-                                    if (splitInput.Any(x => x.Contains(this.botName))) {
-                                        this.WyspaBotSay(CommandType.ResponseWhenMentionedCommand);
-                                    }
-                                    break;
-                            }
+                                //case "-cltmp":
+                                //    this.postedMessages.Clear();
+                                //    break;
+                                //case "-debug":
+                                //    this.WyspaBotDebug(this.lastInnerException);
+                                //    break;
+                                //case "-rmevents":
+                                //    this.WyspaBotSay(CommandType.ResetAllEventsCommand);
+                                //    break;
+                           // }
                         }
                     }
                     catch (Exception e) {

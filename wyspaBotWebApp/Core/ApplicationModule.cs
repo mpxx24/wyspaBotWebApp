@@ -81,7 +81,8 @@ namespace wyspaBotWebApp.Core {
                    .WithParameter(new NamedParameter("mailSenderAddress", this.mailSenderAddress))
                    .WithParameter(new NamedParameter("mailSenderPassword", this.mailSenderPassword));
 
-            builder.RegisterType<PersonalDataProvider>().As<IPersonalDataProvider>();
+            builder.RegisterType<PersonalDataProvider>().As<IPersonalDataProvider>()
+                .WithParameter(new NamedParameter("emailAddress", this.mailSenderAddress));
 
             builder.RegisterType<LogsProvider>().As<ILogsProvider>();
 
