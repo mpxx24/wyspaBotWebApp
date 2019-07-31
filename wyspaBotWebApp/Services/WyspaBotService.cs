@@ -204,10 +204,7 @@ namespace wyspaBotWebApp.Services {
                             var actualCommand = commands.FirstOrDefault(x => x.Aliases.Contains(commandText));
                             if (actualCommand != null) {
                                 var messages = actualCommand.Code?.Invoke(splitInput, this.botName, this.postedMessages, this.chatUsers);
-
-                                foreach (var message in messages) {
-                                    this.SendData($"{this.messageAlias} {this.channel} :{message}");
-                                }
+                                this.WyspaBotDebug(messages);
                             }
                             else {
                                 if (splitInput.Any(x => x.Contains(this.botName))) {

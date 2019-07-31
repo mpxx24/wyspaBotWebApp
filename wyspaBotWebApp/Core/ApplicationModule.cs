@@ -5,6 +5,7 @@ using Autofac.Integration.Mvc;
 using NHibernate;
 using wyspaBotWebApp.Services;
 using wyspaBotWebApp.Services.Calendar;
+using wyspaBotWebApp.Services.CommandsService;
 using wyspaBotWebApp.Services.Email;
 using wyspaBotWebApp.Services.GoogleMaps;
 using wyspaBotWebApp.Services.Markov;
@@ -85,6 +86,8 @@ namespace wyspaBotWebApp.Core {
                 .WithParameter(new NamedParameter("emailAddress", this.mailSenderAddress));
 
             builder.RegisterType<LogsProvider>().As<ILogsProvider>();
+
+            builder.RegisterType<CommandsService>().As<ICommandsService>();
 
             builder.RegisterType<TaskService>().As<ITaskService>()
                    .SingleInstance();
