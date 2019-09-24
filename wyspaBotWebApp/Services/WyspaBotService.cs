@@ -28,7 +28,7 @@ namespace wyspaBotWebApp.Services {
         private readonly string server = "irc.freenode.net";
         private readonly List<string> lastInnerException = new List<string>();
         private bool shouldStartSavingMessages;
-        private string endOfNamesListString = "End of /NAMES list.";
+        private string startReadingWhenContainsString = "Thank you for using freenode";
 
         private readonly string botName;
         private readonly string channel;
@@ -79,11 +79,10 @@ namespace wyspaBotWebApp.Services {
             this.logger.Debug($"Starting to read the chat! Channel {this.channel}");
             while (true) {
                 string inputLine;
-                var separator = $"{this.channel} :";
                 while ((inputLine = this.reader.ReadLine()) != null) {
                     try {
                         var splitInput = inputLine.Split(' ').ToList();
-                        var phrase = inputLine.Substring(inputLine.IndexOf(separator, StringComparison.Ordinal) + separator.Length);
+                        var phrase = this.GetPhrase(inputLine);
 
                         if (splitInput[0] == "PING") {
                             var pongReply = splitInput[1];
@@ -161,11 +160,11 @@ namespace wyspaBotWebApp.Services {
                             this.WyspaBotSayPrivate(CommandType.StopUsingPrivateChannelCommand, nick);
                         }
 
-                        if (phrase == this.endOfNamesListString) {
+                        if (phrase.Contains(this.startReadingWhenContainsString)) {
                             this.shouldStartSavingMessages = true;
                         }
 
-                        if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.StartsWith(this.botName) && phrase != this.endOfNamesListString) {
+                        if (splitInput.Count >= 4 && this.shouldStartSavingMessages && !phrase.StartsWith(this.botName) && phrase != this.startReadingWhenContainsString) {
                             var nick = this.GetUserNick(splitInput);
 
                             if (!string.IsNullOrEmpty(nick) && !nick.Contains('_')) {
@@ -443,6 +442,12 @@ namespace wyspaBotWebApp.Services {
                     this.lastInnerException.Add(m);
                 }
             }
+        }
+
+        private string GetPhrase(string inputLine)
+        {
+            var separator = $"{this.channel.ToLowerInvariant()} :";
+            return inputLine.Substring(inputLine.IndexOf(separator, StringComparison.Ordinal) + separator.Length);
         }
     }
 }
