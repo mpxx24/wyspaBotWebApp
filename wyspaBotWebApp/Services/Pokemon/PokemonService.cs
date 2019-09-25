@@ -112,7 +112,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
             return new List<string> {
                 "POKEBATTLE STATS",
                 $"MOST WINS PER PLAYER: ({results.PlayersWithTheMostWins.FirstPlace.Value}) {results.PlayersWithTheMostWins.FirstPlace.Name}, ({results.PlayersWithTheMostWins.SecondPlace.Value}) {results.PlayersWithTheMostWins.SecondPlace.Name}, ({results.PlayersWithTheMostWins.ThirdPlace.Value}) {results.PlayersWithTheMostWins.ThirdPlace.Name}",
-                $"BEST WIN RATIO (n >= 50): ({results.WinRatioPerPlayer.FirstPlace.Value}) {results.WinRatioPerPlayer.FirstPlace.Name}, ({results.WinRatioPerPlayer.SecondPlace.Value}) {results.WinRatioPerPlayer.SecondPlace.Name}, ({results.WinRatioPerPlayer.ThirdPlace.Value}) {results.WinRatioPerPlayer.ThirdPlace.Name}",
+                $"BEST WIN RATIO (n >= 50): ({results.WinRatioPerPlayer.FirstPlace.Value} %) {results.WinRatioPerPlayer.FirstPlace.Name}, ({results.WinRatioPerPlayer.SecondPlace.Value} %) {results.WinRatioPerPlayer.SecondPlace.Name}, ({results.WinRatioPerPlayer.ThirdPlace.Value} %) {results.WinRatioPerPlayer.ThirdPlace.Name}",
                 $"MOST WINS PER POKEMON: ({results.PokemonsWithTheMostWins.FirstPlace.Value}) {results.PokemonsWithTheMostWins.FirstPlace.Name}, ({results.PokemonsWithTheMostWins.SecondPlace.Value}) {results.PokemonsWithTheMostWins.SecondPlace.Name}, ({results.PokemonsWithTheMostWins.ThirdPlace.Value}) {results.PokemonsWithTheMostWins.ThirdPlace.Name}",
                 $"MOST GAMES TOTAL PER PLAYER: ({results.PlayersWithThewMostGames.FirstPlace.Value}) {results.PlayersWithThewMostGames.FirstPlace.Name}, ({results.PlayersWithThewMostGames.SecondPlace.Value}) {results.PlayersWithThewMostGames.SecondPlace.Name}, ({results.PlayersWithThewMostGames.ThirdPlace.Value}) {results.PlayersWithThewMostGames.ThirdPlace.Name}",
                 $"MOST GAMES STARTED PER PLAYER: ({results.PlayersThatStartedTheMostGames.FirstPlace.Value}) {results.PlayersThatStartedTheMostGames.FirstPlace.Name}, ({results.PlayersThatStartedTheMostGames.SecondPlace.Value}) {results.PlayersThatStartedTheMostGames.SecondPlace.Name}, ({results.PlayersThatStartedTheMostGames.ThirdPlace.Value}) {results.PlayersThatStartedTheMostGames.ThirdPlace.Name}",
@@ -137,46 +137,74 @@ namespace wyspaBotWebApp.Services.Pokemon {
             return this.pokemonApiService.GetRandomPokemon();
         }
 
-        private PokeBattleStatsDto GetPokeBattleStatsBasedOnRecords(IEnumerable<PokeBattleResult> results) {
+        private PokeBattleStatsDto GetPokeBattleStatsBasedOnRecords(IEnumerable<PokeBattleResult> results)
+        {
             var pokeBattleResults = results as IList<PokeBattleResult> ?? results.ToList();
 
             var numberOfGamesWonPerPlayer = pokeBattleResults.Where(x => !string.IsNullOrEmpty(x.WinnerNick)).GroupBy(x => x.WinnerNick)
-                                                             .Select(gr => new {name = gr.Key, number = gr.Count()})
-                                                             .OrderByDescending(y => y.number)
-                                                             .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.number, pokeBattleResult.name))
-                                                             .ToList();
+                .Select(gr => new {name = gr.Key, number = gr.Count()})
+                .OrderByDescending(y => y.number)
+                .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.number, pokeBattleResult.name))
+                .ToList();
 
             var numberOfGamesWonPerPokemon = pokeBattleResults.Where(x => !string.IsNullOrEmpty(x.WinningPokemonName)).GroupBy(x => x.WinningPokemonName)
-                                                              .Select(gr => new {name = gr.Key, number = gr.Count()})
-                                                              .OrderByDescending(y => y.number)
-                                                              .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.number, pokeBattleResult.name))
-                                                              .ToList();
+                .Select(gr => new {name = gr.Key, number = gr.Count()})
+                .OrderByDescending(y => y.number)
+                .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.number, pokeBattleResult.name))
+                .ToList();
+
+            var numberOfGamesLostPerPokemon = pokeBattleResults.Where(x => !string.IsNullOrEmpty(x.LoosingPokemonName))
+                .GroupBy(x => x.LoosingPokemonName)
+                .Select(gr => new {name = gr.Key, number = gr.Count()})
+                .OrderByDescending(y => y.number)
+                .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.number, pokeBattleResult.name))
+                .ToList();
 
             var numberOfGamesStartedPerPlayer = pokeBattleResults.Where(x => !string.IsNullOrEmpty(x.PlayerNick)).GroupBy(x => x.PlayerNick)
-                                                                 .Select(gr => new {name = gr.Key, numberOfWins = gr.Count()})
-                                                                 .OrderByDescending(y => y.numberOfWins)
-                                                                 .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.numberOfWins, pokeBattleResult.name))
-                                                                 .ToList();
+                .Select(gr => new {name = gr.Key, numberOfWins = gr.Count()})
+                .OrderByDescending(y => y.numberOfWins)
+                .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.numberOfWins, pokeBattleResult.name))
+                .ToList();
 
             var numberOfGamesBeingChallengedPerPlayer = pokeBattleResults.Where(x => !string.IsNullOrEmpty(x.OpponentNick)).GroupBy(x => x.OpponentNick)
-                                                                         .Select(gr => new {name = gr.Key, numberOfWins = gr.Count()})
-                                                                         .OrderByDescending(y => y.numberOfWins)
-                                                                         .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.numberOfWins, pokeBattleResult.name))
-                                                                         .ToList();
+                .Select(gr => new {name = gr.Key, numberOfWins = gr.Count()})
+                .OrderByDescending(y => y.numberOfWins)
+                .Select(pokeBattleResult => new PokeBattleStringNumberObject(pokeBattleResult.numberOfWins, pokeBattleResult.name))
+                .ToList();
 
             //need to copy by value... (now for real tho)
             var totalNumberOfGamesPerPLayer = numberOfGamesStartedPerPlayer.ConvertAll(x => new PokeBattleStringNumberObject(x.Value, x.Name));
-            foreach (var ch in numberOfGamesBeingChallengedPerPlayer) {
-                if (totalNumberOfGamesPerPLayer.Any(x => x.Name == ch.Name)) {
+            var totalNumberOfGamePerPokemon = numberOfGamesWonPerPokemon.ConvertAll(x => new PokeBattleStringNumberObject(x.Value, x.Name));
+
+            foreach (var ch in numberOfGamesBeingChallengedPerPlayer)
+            {
+                if (totalNumberOfGamesPerPLayer.Any(x => x.Name == ch.Name))
+                {
                     totalNumberOfGamesPerPLayer.First(y => ch.Name != null && y.Name == ch.Name).Value += ch.Value;
                 }
-                else {
+                else
+                {
                     totalNumberOfGamesPerPLayer.Add(new PokeBattleStringNumberObject(ch.Value, ch.Name));
                 }
             }
+
+            foreach (var ch in numberOfGamesLostPerPokemon)
+            {
+                if (totalNumberOfGamePerPokemon.Any(x => x.Name == ch.Name))
+                {
+                    totalNumberOfGamePerPokemon.First(y => ch.Name != null && y.Name == ch.Name).Value += ch.Value;
+                }
+                else
+                {
+                    totalNumberOfGamePerPokemon.Add(new PokeBattleStringNumberObject(ch.Value, ch.Name));
+                }
+            }
+
             totalNumberOfGamesPerPLayer = totalNumberOfGamesPerPLayer.OrderByDescending(x => x.Value).ToList();
+            totalNumberOfGamePerPokemon = totalNumberOfGamePerPokemon.OrderByDescending(x => x.Value).ToList();
 
             var winratioPerPlayer = new List<PokeBattleStringNumberObject>();
+            var winratioPerPokemon = new List<PokeBattleStringNumberObject>();
 
             foreach (var gamesPerPlayer in totalNumberOfGamesPerPLayer)
             {
@@ -187,15 +215,27 @@ namespace wyspaBotWebApp.Services.Pokemon {
                         var numberOfWinsItem = numberOfGamesWonPerPlayer.FirstOrDefault(x => x.Name == gamesPerPlayer.Name);
                         var winRatio = Math.Round(100 * ((numberOfWinsItem?.Value ?? 0) / gamesPerPlayer.Value), 2);
                         winratioPerPlayer.Add(new PokeBattleStringNumberObject(winRatio, numberOfWinsItem?.Name));
-                    } 
+                    }
+                }
+            }
+
+            foreach (var gamesPerPokemon in totalNumberOfGamePerPokemon)
+            {
+                if (!winratioPerPokemon.Any(x => x.Name == gamesPerPokemon.Name))
+                {
+                    var numberOfWinsItem = numberOfGamesWonPerPokemon.FirstOrDefault(x => x.Name == gamesPerPokemon.Name);
+                    var winRatio = Math.Round(100 * ((numberOfWinsItem?.Value ?? 0) / gamesPerPokemon.Value), 2);
+                    winratioPerPokemon.Add(new PokeBattleStringNumberObject(winRatio, numberOfWinsItem?.Name));
                 }
             }
 
             winratioPerPlayer = winratioPerPlayer.OrderByDescending(x => x.Value).ToList();
+            winratioPerPokemon = winratioPerPokemon.OrderByDescending(x => x.Value).ToList();
 
-            var linkToTheFullStats = this.GetLinkForFullStats(numberOfGamesWonPerPlayer, numberOfGamesWonPerPokemon, numberOfGamesStartedPerPlayer, numberOfGamesBeingChallengedPerPlayer, totalNumberOfGamesPerPLayer, winratioPerPlayer);
+            var linkToTheFullStats = this.GetLinkForFullStats(numberOfGamesWonPerPlayer, numberOfGamesWonPerPokemon, numberOfGamesStartedPerPlayer, numberOfGamesBeingChallengedPerPlayer, totalNumberOfGamesPerPLayer, winratioPerPlayer, winratioPerPokemon);
 
-            var stats = new PokeBattleStatsDto {
+            var stats = new PokeBattleStatsDto
+            {
                 PlayersWithTheMostWins = this.GetStandingFromList(numberOfGamesWonPerPlayer),
                 PlayersThatStartedTheMostGames = this.GetStandingFromList(numberOfGamesStartedPerPlayer),
                 PlayersThatWereChallengedMostOften = this.GetStandingFromList(numberOfGamesBeingChallengedPerPlayer),
@@ -208,7 +248,7 @@ namespace wyspaBotWebApp.Services.Pokemon {
             return stats;
         }
 
-        private string GetLinkForFullStats(IList<PokeBattleStringNumberObject> numberOfGamesWonPerPlayer, IList<PokeBattleStringNumberObject> numberOfGamesWonPerPokemon, IList<PokeBattleStringNumberObject> numberOfGamesStartedPerPlayer, IList<PokeBattleStringNumberObject> numberOfGamesBeingChallengedPerPlayer, IList<PokeBattleStringNumberObject> totalNumberOfGamesPerPlayer, IList<PokeBattleStringNumberObject> winRatioPerPlayer) {
+        private string GetLinkForFullStats(IList<PokeBattleStringNumberObject> numberOfGamesWonPerPlayer, IList<PokeBattleStringNumberObject> numberOfGamesWonPerPokemon, IList<PokeBattleStringNumberObject> numberOfGamesStartedPerPlayer, IList<PokeBattleStringNumberObject> numberOfGamesBeingChallengedPerPlayer, IList<PokeBattleStringNumberObject> totalNumberOfGamesPerPlayer, IList<PokeBattleStringNumberObject> winRatioPerPlayer, IList<PokeBattleStringNumberObject> winRatioPerPokemon) {
             var sb = new StringBuilder();
 
             sb.AppendLine("MOST WINS PER PLAYER");
@@ -227,6 +267,12 @@ namespace wyspaBotWebApp.Services.Pokemon {
             sb.AppendLine("MOST WINS PER POKEMON");
             foreach (var wonPerPok in numberOfGamesWonPerPokemon) {
                 sb.Append($"({wonPerPok.Value}) {wonPerPok.Name}, ");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("BEST WIN RATIO PER POKEMON");
+            foreach (var winratioPerPok in winRatioPerPokemon) {
+                sb.Append($"({winratioPerPok.Value} %) {winratioPerPok.Name}, ");
             }
             sb.AppendLine();
 
